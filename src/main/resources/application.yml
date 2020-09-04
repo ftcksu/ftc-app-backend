@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${FTC_DATASOURCE_URL:jdbc:mysql://localhost:3306/}${FTC_DATASOURCE_NAME}
+    username: ${FTC_DATASOURCE_USERNAME}
+    password: ${FTC_DATASOURCE_PASSWORD}
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+  jpa:
+    hibernate:
+      ddl-auto: update
+    generate-ddl: on
+    show-sql: on
+    properties:
+      hibernate.format_sql: true
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+storage:
+  location: ./images/
+firebase:
+  configuration-file: ${FTC_FIREBASE_ADMIN_JSON}
+authentication:
+  secret-key: ${FTC_SECRET_KEY}
+server:
+  servlet:
+    context-path: /api
+  port: 8080
