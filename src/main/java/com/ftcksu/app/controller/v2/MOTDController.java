@@ -1,7 +1,7 @@
 package com.ftcksu.app.controller.v2;
 
 import com.ftcksu.app.model.entity.MOTD;
-import com.ftcksu.app.model.response.AcceptedResponse;
+import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.MOTDService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +20,19 @@ public class MOTDController {
 
     @GetMapping
     public ResponseEntity<?> getMOTD() {
-        return ResponseEntity.ok(new AcceptedResponse<>(motdService.getMOTD()));
+        return ResponseEntity.ok(new ResponseTemplate<>(motdService.getMOTD()));
     }
 
     @PostMapping
     public ResponseEntity<?> addMOTD(@RequestBody MOTD motd) {
         motdService.createNewMOTD(motd);
-        return ResponseEntity.ok(new AcceptedResponse<>("Message of the day added successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Message of the day added successfully."));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMOTD(@PathVariable Integer id) {
         motdService.deleteMOTD(id);
-        return ResponseEntity.ok(new AcceptedResponse<>("Message of the day deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Message of the day deleted successfully."));
     }
 
 }

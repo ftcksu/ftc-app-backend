@@ -1,7 +1,7 @@
 package com.ftcksu.app.controller.v2;
 
 import com.ftcksu.app.model.entity.ApprovalStatus;
-import com.ftcksu.app.model.response.AcceptedResponse;
+import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -24,7 +24,7 @@ public class ImageController {
 
     @GetMapping
     public ResponseEntity<?> getAllImages() {
-        return ResponseEntity.ok(new AcceptedResponse<>(storageService.getAllImages()));
+        return ResponseEntity.ok(new ResponseTemplate<>(storageService.getAllImages()));
     }
 
     @GetMapping("/{id}")
@@ -40,13 +40,13 @@ public class ImageController {
     @PostMapping("/{id}")
     public ResponseEntity<?> uploadFile(@PathVariable Integer id, @RequestParam("file") MultipartFile file) {
         storageService.saveImage(file, id);
-        return ResponseEntity.ok(new AcceptedResponse<>("Image saved successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Image saved successfully."));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteImage(@PathVariable Integer id) {
         storageService.deleteImage(id);
-        return ResponseEntity.ok(new AcceptedResponse<>("Image deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Image deleted successfully."));
     }
 
     @GetMapping("/{id}/thumb")
@@ -61,14 +61,14 @@ public class ImageController {
 
     @GetMapping("/pending")
     public ResponseEntity<?> getAllPendingImages() {
-        return ResponseEntity.ok(new AcceptedResponse<>(storageService.getAllPendingImages()));
+        return ResponseEntity.ok(new ResponseTemplate<>(storageService.getAllPendingImages()));
     }
 
     @PutMapping("/pending/{id}")
     public ResponseEntity<?> updatePendingImage(@PathVariable Integer id,
                                                 @RequestParam(name = "approval_status") ApprovalStatus approvalStatus) {
         storageService.updateImage(id, approvalStatus);
-        return ResponseEntity.ok(new AcceptedResponse<>("Pending image has been updated successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Pending image has been updated successfully."));
     }
 
 }

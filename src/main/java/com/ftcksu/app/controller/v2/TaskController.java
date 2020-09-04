@@ -1,7 +1,7 @@
 package com.ftcksu.app.controller.v2;
 
 import com.ftcksu.app.model.entity.ApprovalStatus;
-import com.ftcksu.app.model.response.AcceptedResponse;
+import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,25 +23,25 @@ public class TaskController {
 
     @GetMapping
     public ResponseEntity<?> getTasksWithApprovalStatus(@RequestParam(name = "approval_status", defaultValue = "READY") ApprovalStatus approvalStatus) {
-        return ResponseEntity.ok(new AcceptedResponse<>(jobService.getTasksByApprovalStatus(approvalStatus)));
+        return ResponseEntity.ok(new ResponseTemplate<>(jobService.getTasksByApprovalStatus(approvalStatus)));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getTask(@PathVariable Integer id) {
-        return ResponseEntity.ok(new AcceptedResponse<>(jobService.getTaskById(id)));
+        return ResponseEntity.ok(new ResponseTemplate<>(jobService.getTaskById(id)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTask(@PathVariable Integer id, @RequestBody Map<String, Object> payload)
             throws InvocationTargetException, IllegalAccessException {
         jobService.updateTask(id, payload);
-        return ResponseEntity.ok(new AcceptedResponse<>("Task updated successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task updated successfully."));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTask(@PathVariable Integer id) {
         jobService.deleteTask(id);
-        return ResponseEntity.ok(new AcceptedResponse<>("Task deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task deleted successfully."));
     }
 
 }

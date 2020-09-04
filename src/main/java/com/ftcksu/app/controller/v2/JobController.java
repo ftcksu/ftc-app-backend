@@ -3,7 +3,7 @@ package com.ftcksu.app.controller.v2;
 import com.ftcksu.app.model.entity.Job;
 import com.ftcksu.app.model.entity.JobType;
 import com.ftcksu.app.model.entity.Task;
-import com.ftcksu.app.model.response.AcceptedResponse;
+import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,35 +22,35 @@ public class JobController {
 
     @GetMapping
     public ResponseEntity<?> getAllJobsByType(@RequestParam(name = "job_type", defaultValue = "ADMIN") JobType jobType) {
-        return ResponseEntity.ok(new AcceptedResponse<>(jobService.getJobsByType(jobType)));
+        return ResponseEntity.ok(new ResponseTemplate<>(jobService.getJobsByType(jobType)));
     }
 
     @PostMapping
     public ResponseEntity<?> addJob(@RequestBody Job job) {
         jobService.createNewJob(job);
-        return ResponseEntity.ok(new AcceptedResponse<>("Job saved successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Job saved successfully."));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getJob(@PathVariable Integer id) {
-        return ResponseEntity.ok(new AcceptedResponse<>(jobService.getJobById(id)));
+        return ResponseEntity.ok(new ResponseTemplate<>(jobService.getJobById(id)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteJob(@PathVariable Integer id) {
         jobService.deleteJob(id);
-        return ResponseEntity.ok(new AcceptedResponse<>("Job deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Job deleted successfully."));
     }
 
     @GetMapping("/{id}/tasks")
     public ResponseEntity<?> getTasksByJob(@PathVariable Integer id) {
-        return ResponseEntity.ok(new AcceptedResponse<>(jobService.getTasksByJob(id)));
+        return ResponseEntity.ok(new ResponseTemplate<>(jobService.getTasksByJob(id)));
     }
 
     @PostMapping("/{id}/tasks")
     public ResponseEntity<?> addTaskToJob(@PathVariable Integer id, @RequestBody Task task) {
         jobService.addTaskToJob(id, task);
-        return ResponseEntity.ok(new AcceptedResponse<>("Task saved successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task saved successfully."));
     }
 
 }

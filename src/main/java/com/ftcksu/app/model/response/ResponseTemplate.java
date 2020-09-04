@@ -16,7 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AcceptedResponse<T> {
+public class ResponseTemplate<T> {
     @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss", timezone = "Asia/Riyadh")
     @CreationTimestamp
     private Date timestamp = new Date();
@@ -24,15 +24,15 @@ public class AcceptedResponse<T> {
     private String message;
     private T result;
 
-    public AcceptedResponse(String message) {
+    public ResponseTemplate(String message) {
         this.message = message;
     }
 
-    public AcceptedResponse(T result) {
+    public ResponseTemplate(T result) {
         this.result = result;
     }
 
-    public AcceptedResponse(String message, T result) {
+    public ResponseTemplate(String message, T result) {
         this.message = message;
         this.result = result;
     }
