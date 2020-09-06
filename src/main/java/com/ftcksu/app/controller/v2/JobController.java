@@ -1,5 +1,6 @@
 package com.ftcksu.app.controller.v2;
 
+import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.entity.Job;
 import com.ftcksu.app.model.entity.JobType;
 import com.ftcksu.app.model.entity.Task;
@@ -48,8 +49,8 @@ public class JobController {
     }
 
     @PostMapping("/{id}/tasks")
-    public ResponseEntity<?> addTaskToJob(@PathVariable Integer id, @RequestBody Task task) {
-        jobService.addTaskToJob(id, task);
+    public ResponseEntity<?> addTaskToJob(@PathVariable Integer id, @RequestBody TaskDto taskDto) {
+        jobService.addTaskToJob(id, taskDto);
         return ResponseEntity.ok(new ResponseTemplate<>("Task saved successfully."));
     }
 

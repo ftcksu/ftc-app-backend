@@ -1,9 +1,12 @@
 package com.ftcksu.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.entity.*;
 import com.ftcksu.app.repository.JobRepository;
 import com.ftcksu.app.repository.TaskRepository;
 import org.apache.commons.beanutils.BeanUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +29,17 @@ public class JobService {
 
     private final UserService userService;
 
+    private final ModelMapper modelMapper;
+
+    private  final ObjectMapper objectMapper;
+
     @Autowired
     public JobService(JobRepository jobRepository, TaskRepository taskRepository, UserService userService) {
         this.jobRepository = jobRepository;
         this.taskRepository = taskRepository;
         this.userService = userService;
+        this.modelMapper = new ModelMapper();
+        this.objectMapper = new ObjectMapper();
     }
 
 
@@ -80,12 +89,13 @@ public class JobService {
 
 
     @Transactional
-    public void addTaskToJob(Integer jobId, Task task) {
+    public void addTaskToJob(Integer jobId, TaskDto taskDto) {
         // Update "updated_at" column that's in the job table.
         Job jobToUpdate = jobRepository.getOne(jobId);
         jobToUpdate.setUpdatedAt(new Date());
         jobRepository.save(jobToUpdate);
 
+        Task task = modelMapper.map(taskDto, Task.class);
         task.setTaskJob(jobToUpdate);
 
         switch (jobToUpdate.getJobType()) {
@@ -105,12 +115,11 @@ public class JobService {
 
 
     @Transactional
-    public void updateTask(Integer taskId, Map<String, Object> payload)
+    public void updateTask(Integer taskId, TaskDto taskDto)
             throws InvocationTargetException, IllegalAccessException {
-        // Remove unnecessary fields.
-        Arrays.asList("taskJob").forEach(payload::remove);
 
         Task taskToUpdate = taskRepository.getOne(taskId);
+        Map<String, Object> payload = objectMapper.convertValue(taskDto, Map.class);
 
         if (payload.containsKey("approval_status")) {
             taskToUpdate.setApprovalStatus(Enum.valueOf(ApprovalStatus.class,
@@ -131,10 +140,11 @@ public class JobService {
 
 
     @Transactional
-    public void addTaskToAdminJob(Integer userId, Task task) {
+    public void addTaskToAdminJob(Integer userId, TaskDto taskDto) {
         User user = userService.getUserById(userId);
         Job adminJob = jobRepository.findJobByUserEqualsAndJobTypeEquals(user);
-        addTaskToJob(adminJob.getId(), task);
+
+        addTaskToJob(adminJob.getId(), taskDto);
 
         // Update user's self job so it fixes order in the admin page.
         Job jobToUpdate = jobRepository.findJobByUserEqualsAndJobTypeEquals(user, JobType.SELF);

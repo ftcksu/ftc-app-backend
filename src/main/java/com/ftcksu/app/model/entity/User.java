@@ -55,10 +55,6 @@ public class User extends BaseEntity {
         this.points += points;
     }
 
-    public void setStudentId(Integer id) {
-        this.id = id;
-    }
-
     public void setPassword(String password) {
        this.password = encoder.encode(password);
     }
