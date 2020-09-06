@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -17,6 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class User extends BaseEntity {
+
+    private static final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
     @JsonIgnore
@@ -53,6 +57,10 @@ public class User extends BaseEntity {
 
     public void setStudentId(Integer id) {
         this.id = id;
+    }
+
+    public void setPassword(String password) {
+       this.password = encoder.encode(password);
     }
 
     public ProfileImage getProfileImage() {
