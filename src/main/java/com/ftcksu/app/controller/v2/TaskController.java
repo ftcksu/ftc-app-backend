@@ -36,14 +36,12 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTask(@PathVariable Integer id, @RequestBody @Valid TaskDto taskDto)
             throws InvocationTargetException, IllegalAccessException {
-        jobService.updateTask(id, taskDto);
-        return ResponseEntity.ok(new ResponseTemplate<>("Task updated successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task updated successfully.",jobService.updateTask(id, taskDto)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTask(@PathVariable Integer id) {
-        jobService.deleteTask(id);
-        return ResponseEntity.ok(new ResponseTemplate<>("Task deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task deleted successfully.",jobService.deleteTask(id)));
     }
 
 }

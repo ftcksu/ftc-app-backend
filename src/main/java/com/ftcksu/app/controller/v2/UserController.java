@@ -56,8 +56,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> addUser(@RequestBody @Valid UserDto userDto) {
-        userService.createNewUser(userDto);
-        return ResponseEntity.ok(new ResponseTemplate<>("User Added Successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>( "User added successfully.",userService.createNewUser(userDto)));
     }
 
     @GetMapping(value = "/{id}")
@@ -69,14 +68,12 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody @Valid UserDto userDto)
             throws InvocationTargetException, IllegalAccessException {
-        userService.updateUser(id, userDto);
-        return ResponseEntity.ok(new ResponseTemplate<>("User updated successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>( "User updated successfully.",userService.updateUser(id, userDto)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
-        userService.deleteUser(id);
-        return ResponseEntity.ok(new ResponseTemplate<>("User deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("User deleted successfully.",userService.deleteUser(id)));
     }
 
     @GetMapping("/{id}/jobs")

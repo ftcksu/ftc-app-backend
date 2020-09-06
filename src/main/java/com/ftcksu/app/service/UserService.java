@@ -95,7 +95,7 @@ public class UserService {
 
 
     @Transactional
-    public void createNewUser(UserDto userDto) throws EntityExistsException {
+    public User createNewUser(UserDto userDto) throws EntityExistsException {
         if (userRepository.existsById(userDto.getId())) {
             throw new EntityExistsException("User already exists.");
         }
@@ -109,21 +109,23 @@ public class UserService {
         jobRepository.saveAll(Arrays.asList(new Job[]{selfJob, adminJob}));
 
         updateRanks();
+        return savedUser;
     }
 
 
     @Transactional
-    public  void  updateUser(Integer userId, UserDto userDto) throws InvocationTargetException, IllegalAccessException {
+    public  User  updateUser(Integer userId, UserDto userDto) throws InvocationTargetException, IllegalAccessException {
         User userToUpdate = userRepository.getOne(userId);
         Map<String, Object> payload = objectMapper.convertValue(userDto, Map.class);
         BeanUtils.populate(userToUpdate, payload);
 
-        userRepository.save(userToUpdate);
+        User updatedUser = userRepository.save(userToUpdate);
+        return updatedUser;
     }
 
 
     @Transactional
-    public void deleteUser(Integer userId) {
+    public User deleteUser(Integer userId) {
         User userToDelete = userRepository.findUserByIdEquals(userId);
         List<Event> userEvents = userToDelete.getEvents();
         List<Job> userJobs = jobRepository.findJobsByUserEqualsOrderByUpdatedAtDesc(userToDelete);
@@ -137,6 +139,8 @@ public class UserService {
         jobRepository.deleteAll(userJobs);
         motdRepository.deleteAll(userMOTDs);
         userRepository.delete(userToDelete);
+
+        return userToDelete;
     }
 
 

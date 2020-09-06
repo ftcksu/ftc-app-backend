@@ -115,7 +115,7 @@ public class JobService {
 
 
     @Transactional
-    public void updateTask(Integer taskId, TaskDto taskDto)
+    public Task updateTask(Integer taskId, TaskDto taskDto)
             throws InvocationTargetException, IllegalAccessException {
 
         Task taskToUpdate = taskRepository.getOne(taskId);
@@ -127,7 +127,7 @@ public class JobService {
         }
 
         BeanUtils.populate(taskToUpdate, payload);
-        taskRepository.save(taskToUpdate);
+        Task updatedTask = taskRepository.save(taskToUpdate);
 
         if (payload.containsKey("points")) {
             userService.updatePoints(taskToUpdate.getTaskJob().getUser().getId(), (int) payload.get("points"));
@@ -136,6 +136,8 @@ public class JobService {
         Job jobToUpdate = taskToUpdate.getTaskJob();
         jobToUpdate.setUpdatedAt(new Date());
         jobRepository.save(jobToUpdate);
+
+        return updatedTask;
     }
 
 
@@ -160,7 +162,7 @@ public class JobService {
 
 
     @Transactional
-    public void deleteTask(Integer taskId) {
+    public Task deleteTask(Integer taskId) {
         Task taskToDelete = taskRepository.getOne(taskId);
         Job jobToDelete = jobRepository.getOne(taskToDelete.getTaskJob().getId());
         taskRepository.delete(taskToDelete);
@@ -168,6 +170,8 @@ public class JobService {
         if (jobToDelete.getTasks().size() == 0 && jobToDelete.getJobType() != JobType.EVENT) {
             jobRepository.delete(jobToDelete);
         }
+
+        return taskToDelete;
     }
 
 }
