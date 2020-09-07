@@ -1,13 +1,17 @@
 package com.ftcksu.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ftcksu.app.model.dto.EventDto;
 import com.ftcksu.app.model.entity.Event;
 import com.ftcksu.app.model.entity.Job;
+import com.ftcksu.app.model.entity.Task;
 import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.repository.EventRepository;
 import com.ftcksu.app.repository.JobRepository;
 import com.ftcksu.app.repository.UserRepository;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +30,16 @@ public class EventService {
 
     private final UserRepository userRepository;
 
+    private final ModelMapper modelMapper;
+
+    private  final ObjectMapper objectMapper;
     @Autowired
     public EventService(EventRepository eventRepository, JobRepository jobRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.modelMapper = new ModelMapper();
+        this.objectMapper = new ObjectMapper();
     }
 
 
@@ -66,15 +75,16 @@ public class EventService {
 
 
     @Transactional
-    public Event createNewEvent(Event event) {
-        List<User> usersToAdd = new ArrayList<>(event.getUsers());
-        event.getUsers().clear();
+    public Event createNewEvent(EventDto eventDto) {
+        Event eventToCreate = modelMapper.map(eventDto, Event.class);
+        List<User> usersToAdd = new ArrayList<>(eventToCreate.getUsers());
+        eventToCreate.getUsers().clear();
 
         // This edits the user table in the database, so we need to fetch the whole user or it'll changes all the user's
         // fields to null.
-        Event savedEvent = eventRepository.save(event);
+        Event savedEvent = eventRepository.save(eventToCreate);
 
-        usersToAdd.add(0, event.getLeader());
+        usersToAdd.add(0, eventToCreate.getLeader());
         usersToAdd.forEach(user -> addUserToEvent(savedEvent.getId(), user.getId()));
 
         return getEventById(savedEvent.getId());
@@ -106,12 +116,11 @@ public class EventService {
 
 
     @Transactional
-    public void updateEvent(Integer eventId, Map<String, Object> payload)
+    public void updateEvent(Integer eventId, EventDto eventDto)
             throws InvocationTargetException, IllegalAccessException, ParseException {
-        Arrays.asList("leader", "users").forEach(payload::remove);
-
 
         Event eventToUpdate = eventRepository.findEventByIdEquals(eventId);
+        Map<String, Object> payload = objectMapper.convertValue(eventDto, Map.class);
 
         if (payload.containsKey("date")) {
             payload.replace("date", DateUtils

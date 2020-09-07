@@ -1,6 +1,7 @@
 package com.ftcksu.app.controller.v2;
 
 import com.ftcksu.app.exception.exceptionResponse.ErrorResponse;
+import com.ftcksu.app.model.dto.EventDto;
 import com.ftcksu.app.model.entity.Event;
 import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.model.request.PushNotificationRequest;
@@ -38,8 +39,8 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addEvent(@RequestBody Event event) {
-        return ResponseEntity.ok(new ResponseTemplate<>(eventService.createNewEvent(event)));
+    public ResponseEntity<?> addEvent(@RequestBody EventDto eventDto) {
+        return ResponseEntity.ok(new ResponseTemplate<>("Event added successfully.",eventService.createNewEvent(eventDto)));
     }
 
     @GetMapping("/{id}")
@@ -48,9 +49,9 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody Map<String, Object> payload)
+    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody EventDto eventDto)
             throws InvocationTargetException, IllegalAccessException, ParseException {
-        eventService.updateEvent(id, payload);
+        eventService.updateEvent(id, eventDto);
         return ResponseEntity.ok(new ResponseTemplate<>("Event updated successfully."));
     }
 

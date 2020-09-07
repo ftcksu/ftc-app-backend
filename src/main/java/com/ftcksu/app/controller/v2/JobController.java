@@ -1,5 +1,6 @@
 package com.ftcksu.app.controller.v2;
 
+import com.ftcksu.app.model.dto.JobDto;
 import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.entity.Job;
 import com.ftcksu.app.model.entity.JobType;
@@ -27,9 +28,8 @@ public class JobController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addJob(@RequestBody Job job) {
-        jobService.createNewJob(job);
-        return ResponseEntity.ok(new ResponseTemplate<>("Job saved successfully."));
+    public ResponseEntity<?> addJob(@RequestBody JobDto jobDto) {
+        return ResponseEntity.ok(new ResponseTemplate<>("Job saved successfully.",jobService.createNewJob(jobDto)));
     }
 
     @GetMapping("/{id}")
@@ -39,8 +39,7 @@ public class JobController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteJob(@PathVariable Integer id) {
-        jobService.deleteJob(id);
-        return ResponseEntity.ok(new ResponseTemplate<>("Job deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Job deleted successfully.",jobService.deleteJob(id)));
     }
 
     @GetMapping("/{id}/tasks")
@@ -50,8 +49,7 @@ public class JobController {
 
     @PostMapping("/{id}/tasks")
     public ResponseEntity<?> addTaskToJob(@PathVariable Integer id, @RequestBody TaskDto taskDto) {
-        jobService.addTaskToJob(id, taskDto);
-        return ResponseEntity.ok(new ResponseTemplate<>("Task saved successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task saved successfully.",jobService.addTaskToJob(id, taskDto)));
     }
 
 }

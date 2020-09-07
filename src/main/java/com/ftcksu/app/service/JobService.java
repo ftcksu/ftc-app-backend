@@ -1,6 +1,7 @@
 package com.ftcksu.app.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ftcksu.app.model.dto.JobDto;
 import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.entity.*;
 import com.ftcksu.app.repository.JobRepository;
@@ -64,12 +65,14 @@ public class JobService {
 
 
     @Transactional
-    public void createNewJob(Job job) {
-        jobRepository.save(job);
+    public Job createNewJob(JobDto jobDto) {
+        Job jobToCreate = modelMapper.map(jobDto,Job.class);
+        Job savedJob = jobRepository.save(jobToCreate);
 
-        if (job.getJobType() == JobType.ADMIN && job.getTasks().size() > 0) {
-            job.getTasks().forEach(task -> userService.updatePoints(job.getUser().getId(), task.getPoints()));
+        if (jobToCreate.getJobType() == JobType.ADMIN && jobToCreate.getTasks().size() > 0) {
+            jobToCreate.getTasks().forEach(task -> userService.updatePoints(jobToCreate.getUser().getId(), task.getPoints()));
         }
+        return savedJob;
     }
 
 
@@ -89,7 +92,7 @@ public class JobService {
 
 
     @Transactional
-    public void addTaskToJob(Integer jobId, TaskDto taskDto) {
+    public Task addTaskToJob(Integer jobId, TaskDto taskDto) {
         // Update "updated_at" column that's in the job table.
         Job jobToUpdate = jobRepository.getOne(jobId);
         jobToUpdate.setUpdatedAt(new Date());
@@ -110,7 +113,8 @@ public class JobService {
                 task.setApprovalStatus(ApprovalStatus.WAITING);
         }
 
-        taskRepository.save(task);
+        Task addedTask = taskRepository.save(task);
+        return addedTask;
     }
 
 
@@ -156,8 +160,10 @@ public class JobService {
 
 
     @Transactional
-    public void deleteJob(Integer jobId) {
-        jobRepository.delete(jobRepository.getOne(jobId));
+    public Job deleteJob(Integer jobId) {
+        Job jobDelete = jobRepository.getOne(jobId);
+        jobRepository.delete(jobDelete);
+        return jobDelete;
     }
 
 
