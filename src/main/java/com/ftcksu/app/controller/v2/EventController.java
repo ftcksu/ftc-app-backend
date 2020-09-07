@@ -70,6 +70,7 @@ public class EventController {
         return ResponseEntity.ok(new ResponseTemplate<>(eventService.getEventById(id).getUsers()));
     }
 
+    // TODO: add another endpoint that receives users, and make this endpoint receives only (id,userId).
     @PostMapping("/{id}/users")
     public ResponseEntity<?> addUserToEvent(@PathVariable Integer id,
                                             @RequestParam(value = "user_id", defaultValue = "-1") Integer userId,

@@ -83,9 +83,6 @@ public class EventService {
 
     @Transactional
     public boolean addUserToEvent(Integer eventId, Integer userId) {
-        if (!(userRepository.existsById(userId) && eventRepository.existsById(eventId))) {
-            return false;
-        }
 
         User userToAdd = userRepository.findUserByIdEquals(userId);
         Event eventToUpdate = eventRepository.findEventByIdEquals(eventId);
