@@ -58,6 +58,10 @@ public class GlobalExceptionHandler {
         return helperResponse(ex, HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+//    @ExceptionHandler(value = FileNotFoundException.class)
+//    public ResponseEntity<ErrorResponse> handleEventCouldNotAddUserException(EventCouldNotAddUserException ex) {
+//        return helperResponse(ex, HttpStatus.BAD_REQUEST, ex.getMessage());
+//    }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ftcksu.app.model.dto.EventDto;
 import com.ftcksu.app.model.entity.Event;
 import com.ftcksu.app.model.entity.Job;
-import com.ftcksu.app.model.entity.Task;
 import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.repository.EventRepository;
 import com.ftcksu.app.repository.JobRepository;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityExistsException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -92,14 +92,14 @@ public class EventService {
 
 
     @Transactional
-    public boolean addUserToEvent(Integer eventId, Integer userId) {
+    public User addUserToEvent(Integer eventId, Integer userId) {
 
         User userToAdd = userRepository.findUserByIdEquals(userId);
         Event eventToUpdate = eventRepository.findEventByIdEquals(eventId);
         Set<User> eventUsers = eventToUpdate.getUsers();
 
         if (eventUsers.size() >= eventToUpdate.getMaxUsers() || eventUsers.contains(userToAdd)) {
-            return false;
+            throw new EntityExistsException("could not add the user due to the max size or the user already exist");
         }
 
         eventUsers.add(userToAdd);
@@ -111,12 +111,12 @@ public class EventService {
             jobRepository.save(jobToInsert);
         }
 
-        return true;
+        return userToAdd;
     }
 
 
     @Transactional
-    public void updateEvent(Integer eventId, EventDto eventDto)
+    public Event updateEvent(Integer eventId, EventDto eventDto)
             throws InvocationTargetException, IllegalAccessException, ParseException {
 
         Event eventToUpdate = eventRepository.findEventByIdEquals(eventId);
@@ -137,24 +137,27 @@ public class EventService {
         }
 
         BeanUtils.populate(eventToUpdate, payload);
-        eventRepository.save(eventToUpdate);
+        Event updatedEvent = eventRepository.save(eventToUpdate);
+
+        return updatedEvent;
     }
 
 
     @Transactional
-    public void deleteEvent(Integer eventId) {
+    public Event deleteEvent(Integer eventId) {
         Event eventToDelete = eventRepository.findEventByIdEquals(eventId);
         List<Job> eventJobs = jobRepository.findJobsByEventEqualsOrderByCreatedAtAsc(eventToDelete);
 
         eventJobs.forEach(job -> job.setEvent(null));
         jobRepository.saveAll(eventJobs);
-
         eventRepository.delete(eventToDelete);
+
+        return eventToDelete;
     }
 
 
     @Transactional
-    public void removeUser(Integer eventId, Integer userId) {
+    public User removeUser(Integer eventId, Integer userId) {
         Event eventToUpdate = eventRepository.getOne(eventId);
         User userToRemove = userRepository.findUserByIdEquals(userId);
 
@@ -164,6 +167,8 @@ public class EventService {
             eventToUpdate.getUsers().remove(userToRemove);
             eventRepository.save(eventToUpdate);
         }
+
+        return userToRemove;
     }
 
 }
