@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping(value = "/v2/jobs")
 public class JobController {
@@ -28,7 +30,7 @@ public class JobController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addJob(@RequestBody JobDto jobDto) {
+    public ResponseEntity<?> addJob(@RequestBody @Valid JobDto jobDto) {
         return ResponseEntity.ok(new ResponseTemplate<>("Job saved successfully.",jobService.createNewJob(jobDto)));
     }
 
@@ -48,7 +50,7 @@ public class JobController {
     }
 
     @PostMapping("/{id}/tasks")
-    public ResponseEntity<?> addTaskToJob(@PathVariable Integer id, @RequestBody TaskDto taskDto) {
+    public ResponseEntity<?> addTaskToJob(@PathVariable Integer id, @RequestBody @Valid TaskDto taskDto) {
         return ResponseEntity.ok(new ResponseTemplate<>("Task saved successfully.",jobService.addTaskToJob(id, taskDto)));
     }
 

@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.List;
@@ -39,7 +40,7 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addEvent(@RequestBody EventDto eventDto) {
+    public ResponseEntity<?> addEvent(@RequestBody @Valid EventDto eventDto) {
         return ResponseEntity.ok(new ResponseTemplate<>("Event added successfully.",eventService.createNewEvent(eventDto)));
     }
 
@@ -49,7 +50,7 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody EventDto eventDto)
+    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto)
             throws InvocationTargetException, IllegalAccessException, ParseException {
         return ResponseEntity.ok(new ResponseTemplate<>("Event updated successfully.",eventService.updateEvent(id, eventDto)));
     }

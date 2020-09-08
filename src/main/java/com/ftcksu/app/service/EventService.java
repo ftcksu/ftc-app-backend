@@ -54,11 +54,6 @@ public class EventService {
     }
 
 
-    public Set<User> getUsersByEvent(Integer eventId) {
-        return eventRepository.getOne(eventId).getUsers();
-    }
-
-
     public List<Job> getJobsByEvent(Event event) {
         return jobRepository.findJobsByEventEqualsOrderByCreatedAtAsc(event);
     }
@@ -77,17 +72,11 @@ public class EventService {
     @Transactional
     public Event createNewEvent(EventDto eventDto) {
         Event eventToCreate = modelMapper.map(eventDto, Event.class);
-        List<User> usersToAdd = new ArrayList<>(eventToCreate.getUsers());
-        eventToCreate.getUsers().clear();
 
-        // This edits the user table in the database, so we need to fetch the whole user or it'll changes all the user's
-        // fields to null.
+        eventToCreate.getUsers().add(eventToCreate.getLeader());
         Event savedEvent = eventRepository.save(eventToCreate);
 
-        usersToAdd.add(0, eventToCreate.getLeader());
-        usersToAdd.forEach(user -> addUserToEvent(savedEvent.getId(), user.getId()));
-
-        return getEventById(savedEvent.getId());
+        return savedEvent;
     }
 
 
@@ -117,24 +106,10 @@ public class EventService {
 
     @Transactional
     public Event updateEvent(Integer eventId, EventDto eventDto)
-            throws InvocationTargetException, IllegalAccessException, ParseException {
+            throws InvocationTargetException, IllegalAccessException {
 
         Event eventToUpdate = eventRepository.findEventByIdEquals(eventId);
         Map<String, Object> payload = objectMapper.convertValue(eventDto, Map.class);
-
-        if (payload.containsKey("date")) {
-            payload.replace("date", DateUtils
-                    .addHours(new SimpleDateFormat("yyyy-MM-dd")
-                            .parse((String) payload.get("date")), 12));
-        }
-
-        if (payload.containsKey("max_users")) {
-            payload.put("maxUsers", payload.get("max_users"));
-        }
-
-        if (payload.containsKey("whats_app_link")) {
-            payload.put("whatsAppLink", payload.get("whats_app_link"));
-        }
 
         BeanUtils.populate(eventToUpdate, payload);
         Event updatedEvent = eventRepository.save(eventToUpdate);
