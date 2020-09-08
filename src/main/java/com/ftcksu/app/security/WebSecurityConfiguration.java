@@ -43,7 +43,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/v2/users/{id}/image").permitAll()
                 .antMatchers(HttpMethod.GET, "/v2/users/{id}/thumb").permitAll()
                 .antMatchers("/login").permitAll()
-//                .anyRequest().authenticated()
+                .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

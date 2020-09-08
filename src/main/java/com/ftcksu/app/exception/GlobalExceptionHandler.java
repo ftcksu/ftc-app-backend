@@ -18,6 +18,7 @@ import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,10 +59,15 @@ public class GlobalExceptionHandler {
         return helperResponse(ex, HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-//    @ExceptionHandler(value = FileNotFoundException.class)
-//    public ResponseEntity<ErrorResponse> handleEventCouldNotAddUserException(EventCouldNotAddUserException ex) {
-//        return helperResponse(ex, HttpStatus.BAD_REQUEST, ex.getMessage());
-//    }
+    @ExceptionHandler(value = InvocationTargetException.class)
+    public ResponseEntity<ErrorResponse> handleEventCouldNotAddUserException(InvocationTargetException ex) {
+        return helperResponse(ex, HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(value = IllegalAccessException.class)
+    public ResponseEntity<ErrorResponse> handleEventCouldNotAddUserException(IllegalAccessException ex) {
+        return helperResponse(ex, HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
