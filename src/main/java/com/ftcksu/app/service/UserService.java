@@ -36,14 +36,13 @@ public class UserService {
                        JobRepository jobRepository,
                        ImageRepository imageRepository,
                        EventService eventService,
-                       MOTDRepository motdRepository,
-                       PasswordEncoder passwordEncoder) {
+                       MOTDRepository motdRepository) {
         this.userRepository = userRepository;
         this.jobRepository = jobRepository;
         this.imageRepository = imageRepository;
         this.eventService = eventService;
         this.motdRepository = motdRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
 
@@ -196,5 +195,4 @@ public class UserService {
 
         return users;
     }
-
 }
