@@ -1,5 +1,6 @@
 package com.ftcksu.app.security;
 
+import com.ftcksu.app.service.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -20,11 +19,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
+    private final SecurityService securityService;
 
     @Autowired
-    public WebSecurityConfiguration(UserDetailsService userDetailsService, JWTAuthenticationFilter jwtAuthenticationFilter) {
+    public WebSecurityConfiguration(UserDetailsService userDetailsService,
+                                    JWTAuthenticationFilter jwtAuthenticationFilter,
+                                    SecurityService securityService) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.securityService = securityService;
     }
 
     @Override
@@ -36,22 +39,63 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.DELETE, "/v2/users/{id}").hasRole("ADMIN")
-                .antMatchers(HttpMethod.POST, "/v2/users/{id}/jobs/admin-submit").hasAnyRole("ADMIN", "MAINTAIN")
-                .antMatchers(HttpMethod.GET, "/v2/images/{id}").permitAll()
-                .antMatchers(HttpMethod.GET, "/v2/images/{id}/thumb").permitAll()
-                .antMatchers(HttpMethod.GET, "/v2/users/{id}/image").permitAll()
-                .antMatchers(HttpMethod.GET, "/v2/users/{id}/thumb").permitAll()
-                .antMatchers("/login").permitAll()
+
+                // Swagger Endpoints:
+                .mvcMatchers(HttpMethod.GET, "/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html**",
+                        "/swagger-ui/**", "/swagger-ui**", "/webjars/**", "favicon.ico")
+                .permitAll()
+
+                // Public Endpoints:
+                .mvcMatchers(HttpMethod.GET, "/images/{id}", "/images/{id}/thumb", "/users/{id}/image",
+                        "/users/{id}/thumb")
+                .permitAll()
+                .mvcMatchers(HttpMethod.POST, "/login")
+                .permitAll()
+
+                // Admin Endpoints:
+                .mvcMatchers(HttpMethod.GET, "/users/uotm", "/jobs", "/tasks", "/images", "/images/pending")
+                .hasAnyRole("ADMIN", "MAINTAIN")
+                .mvcMatchers(HttpMethod.POST, "/users", "/users/{id}/jobs/admin-submit", "/jobs",
+                        "/users/{id}/notify", "/notifications/**")
+                .hasAnyRole("ADMIN", "MAINTAIN")
+                .mvcMatchers(HttpMethod.PUT, "/images/pending")
+                .hasAnyRole("ADMIN", "MAINTAIN")
+                .mvcMatchers(HttpMethod.DELETE, "/users/{id}", "/events/{id}", "/jobs/{id}", "/tasks/{id}",
+                        "/images/{id}", "/motd/{id}")
+                .hasAnyRole("ADMIN", "MAINTAIN")
+
+                // User Related Protected Endpoints:
+                .mvcMatchers(HttpMethod.GET, "/users/{id}", "/users/{id}/image-history", "/users/{id}/jobs")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
+                .mvcMatchers(HttpMethod.PUT, "/users/{id}/**")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
+
+                // Event Related Protected Endpoints:
+                .mvcMatchers(HttpMethod.GET, "/events/{id}/jobs")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isEventLeader(#id)")
+                .mvcMatchers(HttpMethod.POST, "/events/{id}/**")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isEventLeader(#id)")
+                .mvcMatchers(HttpMethod.PUT, "/events/{id}/**")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isEventLeader(#id)")
+                .mvcMatchers(HttpMethod.DELETE, "/events/{id}/users")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isEventLeader(#id)")
+
+                // Job Related Protected Endpoints:
+                .mvcMatchers(HttpMethod.GET, "/jobs/{id}/**")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isJobOwner(#id)")
+                .mvcMatchers(HttpMethod.POST, "/jobs/{id}/**")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isJobOwner(#id)")
+
+                // Task Related Protected Endpoints:
+                .mvcMatchers(HttpMethod.GET, "/tasks/{id}")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isTaskOwner(#id)")
+                .mvcMatchers(HttpMethod.PUT, "/tasks/{id}")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isTaskOwner(#id)")
+
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-    }
-
-    @Bean
-    public PasswordEncoder getPasswordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean
