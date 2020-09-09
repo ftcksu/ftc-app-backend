@@ -138,7 +138,7 @@ public class UserController {
                 .contentType(MediaType.IMAGE_JPEG).body(resource);
     }
 
-    @GetMapping("/{id}/image/history")
+    @GetMapping("/{id}/image-history")
     public ResponseEntity<?> getImageHistory(@PathVariable Integer id) {
         return ResponseEntity.ok(new ResponseTemplate<>(userService.getUserById(id).getImageHistory()));
     }

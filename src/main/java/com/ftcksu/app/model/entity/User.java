@@ -55,9 +55,9 @@ public class User extends BaseEntity {
         this.points += points;
     }
 
-    public void setPassword(String password) {
-       this.password = encoder.encode(password);
-    }
+//    public void setPassword(String password) {
+//       this.password = encoder.encode(password);
+//    }
 
     public ProfileImage getProfileImage() {
         for (ProfileImage profileImage : imageHistory) {
