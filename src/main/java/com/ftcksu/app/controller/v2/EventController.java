@@ -1,6 +1,7 @@
 package com.ftcksu.app.controller.v2;
 
 import com.ftcksu.app.exception.exceptionResponse.ErrorResponse;
+import com.ftcksu.app.model.dto.EventDto;
 import com.ftcksu.app.model.entity.Event;
 import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.model.request.PushNotificationRequest;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.List;
@@ -38,8 +40,8 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addEvent(@RequestBody Event event) {
-        return ResponseEntity.ok(new ResponseTemplate<>(eventService.createNewEvent(event)));
+    public ResponseEntity<?> addEvent(@RequestBody @Valid EventDto eventDto) {
+        return ResponseEntity.ok(new ResponseTemplate<>("Event added successfully.",eventService.createNewEvent(eventDto)));
     }
 
     @GetMapping("/{id}")
@@ -48,16 +50,14 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody Map<String, Object> payload)
+    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto)
             throws InvocationTargetException, IllegalAccessException, ParseException {
-        eventService.updateEvent(id, payload);
-        return ResponseEntity.ok(new ResponseTemplate<>("Event updated successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Event updated successfully.",eventService.updateEvent(id, eventDto)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEvent(@PathVariable Integer id) {
-        eventService.deleteEvent(id);
-        return ResponseEntity.ok(new ResponseTemplate<>("Event deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Event deleted successfully.",eventService.deleteEvent(id)));
     }
 
     @GetMapping("/{id}/jobs")
@@ -70,20 +70,15 @@ public class EventController {
         return ResponseEntity.ok(new ResponseTemplate<>(eventService.getEventById(id).getUsers()));
     }
 
+    @PostMapping("/{id}/user")
+    public ResponseEntity<?> addUserToEvent(@PathVariable Integer id, @RequestParam(value = "user_id") Integer userId) {
+        return ResponseEntity.ok(new ResponseTemplate<>("User added successfully.",eventService.addUserToEvent(id, userId)));
+    }
+
     @PostMapping("/{id}/users")
-    public ResponseEntity<?> addUserToEvent(@PathVariable Integer id,
-                                            @RequestParam(value = "user_id", defaultValue = "-1") Integer userId,
-                                            @RequestBody(required = false) List<User> users) {
-        if (users != null) {
-            users.forEach(user -> eventService.addUserToEvent(id, user.getId()));
-            return ResponseEntity.ok(new ResponseTemplate<>("Users added successfully."));
-        } else {
-            if (eventService.addUserToEvent(id, userId)) {
-                return ResponseEntity.ok(new ResponseTemplate<>("User added successfully."));
-            } else {
-                return new ResponseEntity<>(new ErrorResponse("Failed to add user."), HttpStatus.BAD_REQUEST);
-            }
-        }
+    public ResponseEntity<?> addUsersToEvent(@PathVariable Integer id, @RequestBody List<User> users) {
+        users.forEach(user->eventService.addUserToEvent(id, user.getId()));
+        return ResponseEntity.ok(new ResponseTemplate<>("Users added successfully."));
     }
 
     @PostMapping("/{id}/broadcast")
@@ -97,8 +92,7 @@ public class EventController {
 
     @DeleteMapping("/{id}/users")
     public ResponseEntity<?> removeUserFromEvent(@PathVariable Integer id, @RequestParam("user_id") Integer userId) {
-        eventService.removeUser(id, userId);
-        return ResponseEntity.ok(new ResponseTemplate<>("User removed successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("User removed successfully.",eventService.removeUser(id, userId)));
     }
 
 }

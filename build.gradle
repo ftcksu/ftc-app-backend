@@ -30,6 +30,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-gradle-plugin:2.2.1.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.modelmapper:modelmapper:2.3.0'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'io.springfox:springfox-boot-starter:3.0.0'
     compileOnly 'org.projectlombok:lombok'
     compile 'commons-beanutils:commons-beanutils:1.9.4'

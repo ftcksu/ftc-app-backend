@@ -1,5 +1,6 @@
 package com.ftcksu.app.controller.v2;
 
+import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.entity.ApprovalStatus;
 import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.JobService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
@@ -32,16 +34,14 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTask(@PathVariable Integer id, @RequestBody Map<String, Object> payload)
+    public ResponseEntity<?> updateTask(@PathVariable Integer id, @RequestBody @Valid TaskDto taskDto)
             throws InvocationTargetException, IllegalAccessException {
-        jobService.updateTask(id, payload);
-        return ResponseEntity.ok(new ResponseTemplate<>("Task updated successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task updated successfully.",jobService.updateTask(id, taskDto)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTask(@PathVariable Integer id) {
-        jobService.deleteTask(id);
-        return ResponseEntity.ok(new ResponseTemplate<>("Task deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task deleted successfully.",jobService.deleteTask(id)));
     }
 
 }

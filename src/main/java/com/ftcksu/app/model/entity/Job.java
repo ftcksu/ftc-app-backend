@@ -64,22 +64,10 @@ public class Job extends BaseEntity {
         this.user = user;
     }
 
-    public void setTasks(List<Task> tasks) {
-        tasks.forEach(task -> task.setTaskJob(this));
-        this.tasks.addAll(tasks);
-    }
-
-    public void setDescription(String description) {
-        tasks.add(new Task(description, this));
-    }
-
     public boolean getEventStatus() {
         return event != null ? event.isFinished() : false;
     }
 
-    public void setUserId(Integer userId) {
-        user = new User(userId);
-    }
 
     public JobUser getUser() {
         return new JobUser(user.getId(), user.getName(), user.getProfileImage());

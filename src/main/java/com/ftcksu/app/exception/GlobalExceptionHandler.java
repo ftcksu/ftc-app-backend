@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,6 +59,15 @@ public class GlobalExceptionHandler {
         return helperResponse(ex, HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(value = InvocationTargetException.class)
+    public ResponseEntity<ErrorResponse> handleEventCouldNotAddUserException(InvocationTargetException ex) {
+        return helperResponse(ex, HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(value = IllegalAccessException.class)
+    public ResponseEntity<ErrorResponse> handleEventCouldNotAddUserException(IllegalAccessException ex) {
+        return helperResponse(ex, HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
@@ -81,6 +92,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
         String customMessage = "Incorrect username or password.";
         return helperResponse(ex, HttpStatus.BAD_REQUEST, customMessage);
+    }
+
+    @ExceptionHandler(EntityExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEntityExistsException(EntityExistsException ex) {
+        return helperResponse(ex, HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

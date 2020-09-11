@@ -1,5 +1,7 @@
 package com.ftcksu.app.controller.v2;
 
+import com.ftcksu.app.model.dto.JobDto;
+import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.entity.Job;
 import com.ftcksu.app.model.entity.JobType;
 import com.ftcksu.app.model.entity.Task;
@@ -8,6 +10,8 @@ import com.ftcksu.app.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/v2/jobs")
@@ -26,9 +30,8 @@ public class JobController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addJob(@RequestBody Job job) {
-        jobService.createNewJob(job);
-        return ResponseEntity.ok(new ResponseTemplate<>("Job saved successfully."));
+    public ResponseEntity<?> addJob(@RequestBody @Valid JobDto jobDto) {
+        return ResponseEntity.ok(new ResponseTemplate<>("Job saved successfully.",jobService.createNewJob(jobDto)));
     }
 
     @GetMapping("/{id}")
@@ -38,8 +41,7 @@ public class JobController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteJob(@PathVariable Integer id) {
-        jobService.deleteJob(id);
-        return ResponseEntity.ok(new ResponseTemplate<>("Job deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("Job deleted successfully.",jobService.deleteJob(id)));
     }
 
     @GetMapping("/{id}/tasks")
@@ -48,9 +50,8 @@ public class JobController {
     }
 
     @PostMapping("/{id}/tasks")
-    public ResponseEntity<?> addTaskToJob(@PathVariable Integer id, @RequestBody Task task) {
-        jobService.addTaskToJob(id, task);
-        return ResponseEntity.ok(new ResponseTemplate<>("Task saved successfully."));
+    public ResponseEntity<?> addTaskToJob(@PathVariable Integer id, @RequestBody @Valid TaskDto taskDto) {
+        return ResponseEntity.ok(new ResponseTemplate<>("Task saved successfully.",jobService.addTaskToJob(id, taskDto)));
     }
 
 }

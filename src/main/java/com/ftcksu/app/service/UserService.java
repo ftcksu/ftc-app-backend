@@ -1,11 +1,15 @@
 package com.ftcksu.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.ftcksu.app.model.dto.UserDto;
 import com.ftcksu.app.model.entity.*;
 import com.ftcksu.app.repository.ImageRepository;
 import com.ftcksu.app.repository.JobRepository;
 import com.ftcksu.app.repository.MOTDRepository;
 import com.ftcksu.app.repository.UserRepository;
 import org.apache.commons.beanutils.BeanUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,7 +33,9 @@ public class UserService {
 
     private final MOTDRepository motdRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
+
+    private  final ObjectMapper objectMapper;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -42,9 +48,25 @@ public class UserService {
         this.imageRepository = imageRepository;
         this.eventService = eventService;
         this.motdRepository = motdRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.modelMapper = new ModelMapper();
+        this.objectMapper = new ObjectMapper();
     }
 
+    private List<User> surpriseStudent(List<User> users){
+        int num = new Random().nextInt((1000));
+
+        if (num < 10) {
+//            int randomIndex = users.indexOf(getUserById((int) (Integer.MAX_VALUE / 4.912973177025762)));
+            int randomIndex = new Random().nextInt(users.size());
+                User secretUser = users.get(randomIndex);
+                secretUser.setName("\uD83D\uDC51 " + secretUser.getName());
+                secretUser.setPoints(9999);
+                users = calculateRanks(users);
+                Collections.sort(users, Comparator.comparingInt(User::getUserRank));
+        }
+
+        return users;
+    }
 
     public List<User> getAllUsers(boolean includeHidden) {
         if (includeHidden) {
@@ -52,20 +74,7 @@ public class UserService {
         }
 
         List<User> users = userRepository.findAllByHiddenIsFalseAndRoleNotIgnoreCaseOrderByUserRankAscNameAsc();
-
-        int num = new Random().nextInt((1000));
-
-        if (num < 10) {
-            int index = users.indexOf(getUserById((int) (Integer.MAX_VALUE / 4.912973177025762)));
-
-            if (index != -1) {
-                User secretUser = users.get(index);
-                secretUser.setName("\uD83D\uDC51 " + secretUser.getName());
-                secretUser.setPoints(9999);
-                users = calculateRanks(users);
-                Collections.sort(users, Comparator.comparingInt(User::getUserRank));
-            }
-        }
+        users = surpriseStudent(users);
 
         return users;
     }
@@ -82,51 +91,37 @@ public class UserService {
 
 
     @Transactional
-    public void createNewUser(User user) throws EntityExistsException {
-        if (userRepository.existsById(user.getId())) {
+    public User createNewUser(UserDto userDto) throws EntityExistsException {
+        if (userRepository.existsById(userDto.getId())) {
             throw new EntityExistsException("User already exists.");
         }
 
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashedPassword);
-        user.setRole("ROLE_USER");
-        User savedUser = userRepository.save(user);
+        User userToAdd = modelMapper.map(userDto, User.class);
+        userToAdd.setRole("ROLE_USER");
+        User savedUser = userRepository.save(userToAdd);
 
         Job selfJob = new Job("رصد أعمالي", savedUser, JobType.SELF);
         Job adminJob = new Job("رصد مباشر", savedUser, JobType.ADMIN);
         jobRepository.saveAll(Arrays.asList(new Job[]{selfJob, adminJob}));
 
         updateRanks();
+        return savedUser;
     }
 
 
     @Transactional
-    public void updateUser(Integer userId, Map<String, Object> payload) throws InvocationTargetException, IllegalAccessException {
-        // TODO: Add the rest of the banned fields.
-        Arrays.asList("points", "userRank").forEach(payload::remove);
-
+    public  User  updateUser(Integer userId, UserDto userDto) throws InvocationTargetException, IllegalAccessException {
         User userToUpdate = userRepository.getOne(userId);
+        Map<String, Object> payload = objectMapper.convertValue(userDto, Map.class);
         BeanUtils.populate(userToUpdate, payload);
 
-        if (payload.containsKey("password")) {
-            String hashedPassword = new BCryptPasswordEncoder().encode(userToUpdate.getPassword());
-            userToUpdate.setPassword(hashedPassword);
-        }
-
-        if (payload.containsKey("device_token")) {
-            payload.put("deviceToken", payload.get("device_token"));
-        }
-
-        if (payload.containsKey("phone_number")) {
-            payload.put("phoneNumber", payload.get("phone_number"));
-        }
-
-        userRepository.save(userToUpdate);
+        User updatedUser = userRepository.save(userToUpdate);
+        return updatedUser;
     }
 
 
     @Transactional
-    public void deleteUser(Integer userId) {
+    public User deleteUser(Integer userId) {
         User userToDelete = userRepository.findUserByIdEquals(userId);
         List<Event> userEvents = userToDelete.getEvents();
         List<Job> userJobs = jobRepository.findJobsByUserEqualsOrderByUpdatedAtDesc(userToDelete);
@@ -140,6 +135,8 @@ public class UserService {
         jobRepository.deleteAll(userJobs);
         motdRepository.deleteAll(userMOTDs);
         userRepository.delete(userToDelete);
+
+        return userToDelete;
     }
 
 

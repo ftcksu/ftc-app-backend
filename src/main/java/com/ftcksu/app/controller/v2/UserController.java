@@ -1,6 +1,8 @@
 package com.ftcksu.app.controller.v2;
 
-import com.ftcksu.app.model.entity.Task;
+import com.ftcksu.app.model.dto.TaskDto;
+import com.ftcksu.app.model.dto.UserDto;
+
 import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.model.request.PushNotificationRequest;
 import com.ftcksu.app.model.response.PushNotificationResponse;
@@ -15,9 +17,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
-import java.util.Map;
+
 
 @RestController
 @RequestMapping(value = "/v2/users")
@@ -52,9 +55,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addUser(@RequestBody User user) {
-        userService.createNewUser(user);
-        return ResponseEntity.ok(new ResponseTemplate<>("User Added Successfully."));
+    public ResponseEntity<?> addUser(@RequestBody @Valid UserDto userDto) {
+        return ResponseEntity.ok(new ResponseTemplate<>( "User added successfully.",userService.createNewUser(userDto)));
     }
 
     @GetMapping(value = "/{id}")
@@ -64,16 +66,14 @@ public class UserController {
 
     //    TODO: check the header throws
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody Map<String, Object> payload)
+    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody @Valid UserDto userDto)
             throws InvocationTargetException, IllegalAccessException {
-        userService.updateUser(id, payload);
-        return ResponseEntity.ok(new ResponseTemplate<>("User updated successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>( "User updated successfully.",userService.updateUser(id, userDto)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
-        userService.deleteUser(id);
-        return ResponseEntity.ok(new ResponseTemplate<>("User deleted successfully."));
+        return ResponseEntity.ok(new ResponseTemplate<>("User deleted successfully.",userService.deleteUser(id)));
     }
 
     @GetMapping("/{id}/jobs")
@@ -82,8 +82,8 @@ public class UserController {
     }
 
     @PostMapping("/{id}/jobs/admin-submit")
-    public ResponseEntity<?> submitAdminJob(@PathVariable Integer id, @RequestBody Task task) {
-        jobService.addTaskToAdminJob(id, task);
+    public ResponseEntity<?> submitAdminJob(@PathVariable Integer id, @RequestBody @Valid TaskDto taskDto) {
+        jobService.addTaskToAdminJob(id, taskDto);
         return ResponseEntity.ok(new ResponseTemplate<>("Admin job submitted successfully."));
     }
 
@@ -138,7 +138,7 @@ public class UserController {
                 .contentType(MediaType.IMAGE_JPEG).body(resource);
     }
 
-    @GetMapping("/{id}/image/history")
+    @GetMapping("/{id}/image-history")
     public ResponseEntity<?> getImageHistory(@PathVariable Integer id) {
         return ResponseEntity.ok(new ResponseTemplate<>(userService.getUserById(id).getImageHistory()));
     }

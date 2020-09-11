@@ -1,9 +1,13 @@
 package com.ftcksu.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ftcksu.app.model.dto.JobDto;
+import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.entity.*;
 import com.ftcksu.app.repository.JobRepository;
 import com.ftcksu.app.repository.TaskRepository;
 import org.apache.commons.beanutils.BeanUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +30,17 @@ public class JobService {
 
     private final UserService userService;
 
+    private final ModelMapper modelMapper;
+
+    private  final ObjectMapper objectMapper;
+
     @Autowired
     public JobService(JobRepository jobRepository, TaskRepository taskRepository, UserService userService) {
         this.jobRepository = jobRepository;
         this.taskRepository = taskRepository;
         this.userService = userService;
+        this.modelMapper = new ModelMapper();
+        this.objectMapper = new ObjectMapper();
     }
 
 
@@ -55,12 +65,14 @@ public class JobService {
 
 
     @Transactional
-    public void createNewJob(Job job) {
-        jobRepository.save(job);
+    public Job createNewJob(JobDto jobDto) {
+        Job jobToCreate = modelMapper.map(jobDto,Job.class);
+        Job savedJob = jobRepository.save(jobToCreate);
 
-        if (job.getJobType() == JobType.ADMIN && job.getTasks().size() > 0) {
-            job.getTasks().forEach(task -> userService.updatePoints(job.getUser().getId(), task.getPoints()));
+        if (jobToCreate.getJobType() == JobType.ADMIN && jobToCreate.getTasks().size() > 0) {
+            jobToCreate.getTasks().forEach(task -> userService.updatePoints(jobToCreate.getUser().getId(), task.getPoints()));
         }
+        return savedJob;
     }
 
 
@@ -80,12 +92,13 @@ public class JobService {
 
 
     @Transactional
-    public void addTaskToJob(Integer jobId, Task task) {
+    public Task addTaskToJob(Integer jobId, TaskDto taskDto) {
         // Update "updated_at" column that's in the job table.
         Job jobToUpdate = jobRepository.getOne(jobId);
         jobToUpdate.setUpdatedAt(new Date());
         jobRepository.save(jobToUpdate);
 
+        Task task = modelMapper.map(taskDto, Task.class);
         task.setTaskJob(jobToUpdate);
 
         switch (jobToUpdate.getJobType()) {
@@ -100,17 +113,17 @@ public class JobService {
                 task.setApprovalStatus(ApprovalStatus.WAITING);
         }
 
-        taskRepository.save(task);
+        Task addedTask = taskRepository.save(task);
+        return addedTask;
     }
 
 
     @Transactional
-    public void updateTask(Integer taskId, Map<String, Object> payload)
+    public Task updateTask(Integer taskId, TaskDto taskDto)
             throws InvocationTargetException, IllegalAccessException {
-        // Remove unnecessary fields.
-        Arrays.asList("taskJob").forEach(payload::remove);
 
         Task taskToUpdate = taskRepository.getOne(taskId);
+        Map<String, Object> payload = objectMapper.convertValue(taskDto, Map.class);
 
         if (payload.containsKey("approval_status")) {
             taskToUpdate.setApprovalStatus(Enum.valueOf(ApprovalStatus.class,
@@ -118,7 +131,7 @@ public class JobService {
         }
 
         BeanUtils.populate(taskToUpdate, payload);
-        taskRepository.save(taskToUpdate);
+        Task updatedTask = taskRepository.save(taskToUpdate);
 
         if (payload.containsKey("points")) {
             userService.updatePoints(taskToUpdate.getTaskJob().getUser().getId(), (int) payload.get("points"));
@@ -127,14 +140,17 @@ public class JobService {
         Job jobToUpdate = taskToUpdate.getTaskJob();
         jobToUpdate.setUpdatedAt(new Date());
         jobRepository.save(jobToUpdate);
+
+        return updatedTask;
     }
 
 
     @Transactional
-    public void addTaskToAdminJob(Integer userId, Task task) {
+    public void addTaskToAdminJob(Integer userId, TaskDto taskDto) {
         User user = userService.getUserById(userId);
         Job adminJob = jobRepository.findJobByUserEqualsAndJobTypeEquals(user);
-        addTaskToJob(adminJob.getId(), task);
+
+        addTaskToJob(adminJob.getId(), taskDto);
 
         // Update user's self job so it fixes order in the admin page.
         Job jobToUpdate = jobRepository.findJobByUserEqualsAndJobTypeEquals(user, JobType.SELF);
@@ -144,13 +160,15 @@ public class JobService {
 
 
     @Transactional
-    public void deleteJob(Integer jobId) {
-        jobRepository.delete(jobRepository.getOne(jobId));
+    public Job deleteJob(Integer jobId) {
+        Job jobDelete = jobRepository.getOne(jobId);
+        jobRepository.delete(jobDelete);
+        return jobDelete;
     }
 
 
     @Transactional
-    public void deleteTask(Integer taskId) {
+    public Task deleteTask(Integer taskId) {
         Task taskToDelete = taskRepository.getOne(taskId);
         Job jobToDelete = jobRepository.getOne(taskToDelete.getTaskJob().getId());
         taskRepository.delete(taskToDelete);
@@ -158,6 +176,8 @@ public class JobService {
         if (jobToDelete.getTasks().size() == 0 && jobToDelete.getJobType() != JobType.EVENT) {
             jobRepository.delete(jobToDelete);
         }
+
+        return taskToDelete;
     }
 
 }

@@ -1,5 +1,7 @@
 package com.ftcksu.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ftcksu.app.model.dto.EventDto;
 import com.ftcksu.app.model.entity.Event;
 import com.ftcksu.app.model.entity.Job;
 import com.ftcksu.app.model.entity.User;
@@ -8,10 +10,12 @@ import com.ftcksu.app.repository.JobRepository;
 import com.ftcksu.app.repository.UserRepository;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityExistsException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,11 +30,16 @@ public class EventService {
 
     private final UserRepository userRepository;
 
+    private final ModelMapper modelMapper;
+
+    private  final ObjectMapper objectMapper;
     @Autowired
     public EventService(EventRepository eventRepository, JobRepository jobRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.modelMapper = new ModelMapper();
+        this.objectMapper = new ObjectMapper();
     }
 
 
@@ -42,11 +51,6 @@ public class EventService {
     public List<Event> getEventsByUser(Integer userId, boolean leader) {
         return leader ? eventRepository.findEventsByLeaderEqualsOrderByCreatedAtDesc(new User(userId)) :
                 eventRepository.findEventsByUsersContainingOrderByCreatedAtDesc(new User(userId));
-    }
-
-
-    public Set<User> getUsersByEvent(Integer eventId) {
-        return eventRepository.getOne(eventId).getUsers();
     }
 
 
@@ -66,33 +70,25 @@ public class EventService {
 
 
     @Transactional
-    public Event createNewEvent(Event event) {
-        List<User> usersToAdd = new ArrayList<>(event.getUsers());
-        event.getUsers().clear();
+    public Event createNewEvent(EventDto eventDto) {
+        Event eventToCreate = modelMapper.map(eventDto, Event.class);
 
-        // This edits the user table in the database, so we need to fetch the whole user or it'll changes all the user's
-        // fields to null.
-        Event savedEvent = eventRepository.save(event);
+        eventToCreate.getUsers().add(eventToCreate.getLeader());
+        Event savedEvent = eventRepository.save(eventToCreate);
 
-        usersToAdd.add(0, event.getLeader());
-        usersToAdd.forEach(user -> addUserToEvent(savedEvent.getId(), user.getId()));
-
-        return getEventById(savedEvent.getId());
+        return savedEvent;
     }
 
 
     @Transactional
-    public boolean addUserToEvent(Integer eventId, Integer userId) {
-        if (!(userRepository.existsById(userId) && eventRepository.existsById(eventId))) {
-            return false;
-        }
+    public User addUserToEvent(Integer eventId, Integer userId) {
 
         User userToAdd = userRepository.findUserByIdEquals(userId);
         Event eventToUpdate = eventRepository.findEventByIdEquals(eventId);
         Set<User> eventUsers = eventToUpdate.getUsers();
 
         if (eventUsers.size() >= eventToUpdate.getMaxUsers() || eventUsers.contains(userToAdd)) {
-            return false;
+            throw new EntityExistsException("could not add the user due to the max size or the user already exist");
         }
 
         eventUsers.add(userToAdd);
@@ -104,51 +100,39 @@ public class EventService {
             jobRepository.save(jobToInsert);
         }
 
-        return true;
+        return userToAdd;
     }
 
 
     @Transactional
-    public void updateEvent(Integer eventId, Map<String, Object> payload)
-            throws InvocationTargetException, IllegalAccessException, ParseException {
-        Arrays.asList("leader", "users").forEach(payload::remove);
-
+    public Event updateEvent(Integer eventId, EventDto eventDto)
+            throws InvocationTargetException, IllegalAccessException {
 
         Event eventToUpdate = eventRepository.findEventByIdEquals(eventId);
-
-        if (payload.containsKey("date")) {
-            payload.replace("date", DateUtils
-                    .addHours(new SimpleDateFormat("yyyy-MM-dd")
-                            .parse((String) payload.get("date")), 12));
-        }
-
-        if (payload.containsKey("max_users")) {
-            payload.put("maxUsers", payload.get("max_users"));
-        }
-
-        if (payload.containsKey("whats_app_link")) {
-            payload.put("whatsAppLink", payload.get("whats_app_link"));
-        }
+        Map<String, Object> payload = objectMapper.convertValue(eventDto, Map.class);
 
         BeanUtils.populate(eventToUpdate, payload);
-        eventRepository.save(eventToUpdate);
+        Event updatedEvent = eventRepository.save(eventToUpdate);
+
+        return updatedEvent;
     }
 
 
     @Transactional
-    public void deleteEvent(Integer eventId) {
+    public Event deleteEvent(Integer eventId) {
         Event eventToDelete = eventRepository.findEventByIdEquals(eventId);
         List<Job> eventJobs = jobRepository.findJobsByEventEqualsOrderByCreatedAtAsc(eventToDelete);
 
         eventJobs.forEach(job -> job.setEvent(null));
         jobRepository.saveAll(eventJobs);
-
         eventRepository.delete(eventToDelete);
+
+        return eventToDelete;
     }
 
 
     @Transactional
-    public void removeUser(Integer eventId, Integer userId) {
+    public User removeUser(Integer eventId, Integer userId) {
         Event eventToUpdate = eventRepository.getOne(eventId);
         User userToRemove = userRepository.findUserByIdEquals(userId);
 
@@ -158,6 +142,8 @@ public class EventService {
             eventToUpdate.getUsers().remove(userToRemove);
             eventRepository.save(eventToUpdate);
         }
+
+        return userToRemove;
     }
 
 }
