@@ -19,7 +19,7 @@ import java.text.ParseException;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/v2/events")
+@RequestMapping(value = "/events")
 @Slf4j
 public class EventController {
 

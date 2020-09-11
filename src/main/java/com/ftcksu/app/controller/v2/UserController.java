@@ -23,7 +23,7 @@ import java.util.Date;
 
 
 @RestController
-@RequestMapping(value = "/v2/users")
+@RequestMapping(value = "/users")
 public class UserController {
 
     private final UserService userService;

@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/v2/motd")
+@RequestMapping(value = "/motd")
 public class MOTDController {
 
     private final MOTDService motdService;

@@ -2,9 +2,7 @@ package com.ftcksu.app.controller.v2;
 
 import com.ftcksu.app.model.dto.JobDto;
 import com.ftcksu.app.model.dto.TaskDto;
-import com.ftcksu.app.model.entity.Job;
 import com.ftcksu.app.model.entity.JobType;
-import com.ftcksu.app.model.entity.Task;
 import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping(value = "/v2/jobs")
+@RequestMapping(value = "/jobs")
 public class JobController {
 
     private final JobService jobService;
