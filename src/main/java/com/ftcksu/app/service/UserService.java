@@ -33,8 +33,6 @@ public class UserService {
 
     private final MOTDRepository motdRepository;
 
-    private final PasswordEncoder passwordEncoder;
-
     private final ModelMapper modelMapper;
 
     private  final ObjectMapper objectMapper;
@@ -44,14 +42,12 @@ public class UserService {
                        JobRepository jobRepository,
                        ImageRepository imageRepository,
                        EventService eventService,
-                       MOTDRepository motdRepository,
-                       PasswordEncoder passwordEncoder) {
+                       MOTDRepository motdRepository) {
         this.userRepository = userRepository;
         this.jobRepository = jobRepository;
         this.imageRepository = imageRepository;
         this.eventService = eventService;
         this.motdRepository = motdRepository;
-        this.passwordEncoder = passwordEncoder;
         this.modelMapper = new ModelMapper();
         this.objectMapper = new ObjectMapper();
     }
@@ -196,5 +192,4 @@ public class UserService {
 
         return users;
     }
-
 }

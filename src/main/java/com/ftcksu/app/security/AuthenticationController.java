@@ -24,5 +24,4 @@ public class AuthenticationController {
         String token = securityService.login(authenticationRequest);
         return ResponseEntity.ok(new AuthenticationResponse(token));
     }
-
 }
