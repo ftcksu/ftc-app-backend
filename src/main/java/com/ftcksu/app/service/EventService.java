@@ -9,7 +9,6 @@ import com.ftcksu.app.repository.EventRepository;
 import com.ftcksu.app.repository.JobRepository;
 import com.ftcksu.app.repository.UserRepository;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,9 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityExistsException;
 import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class EventService {
@@ -88,7 +87,7 @@ public class EventService {
         Set<User> eventUsers = eventToUpdate.getUsers();
 
         if (eventUsers.size() >= eventToUpdate.getMaxUsers() || eventUsers.contains(userToAdd)) {
-            throw new EntityExistsException("could not add the user due to the max size or the user already exist");
+            throw new EntityExistsException("could not add the user due to the max size or the user already exist.");
         }
 
         eventUsers.add(userToAdd);

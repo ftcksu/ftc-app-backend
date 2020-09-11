@@ -20,20 +20,16 @@ import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
+import java.util.Map;
 
 
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
-
     private final UserService userService;
-
     private final JobService jobService;
-
     private final EventService eventService;
-
     private final StorageService storageService;
-
     private final PushNotificationService pushNotificationService;
 
     @Autowired
@@ -64,7 +60,6 @@ public class UserController {
         return ResponseEntity.ok(new ResponseTemplate<>(userService.getUserById(id)));
     }
 
-    //    TODO: check the header throws
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody @Valid UserDto userDto)
             throws InvocationTargetException, IllegalAccessException {
@@ -85,6 +80,13 @@ public class UserController {
     public ResponseEntity<?> submitAdminJob(@PathVariable Integer id, @RequestBody @Valid TaskDto taskDto) {
         jobService.addTaskToAdminJob(id, taskDto);
         return ResponseEntity.ok(new ResponseTemplate<>("Admin job submitted successfully."));
+    }
+
+    @PutMapping("/{id}/admin-update")
+    public ResponseEntity<?> updateUserAsAdmin(@PathVariable Integer id, @RequestBody Map<String, Object> payload)
+            throws InvocationTargetException, IllegalAccessException {
+        return ResponseEntity.ok(new ResponseTemplate<>("User updated successfully.",
+                userService.updateUser(id, payload)));
     }
 
     @GetMapping("/{id}/events")

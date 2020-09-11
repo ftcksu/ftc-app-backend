@@ -1,7 +1,6 @@
 package com.ftcksu.app.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.ftcksu.app.model.dto.UserDto;
 import com.ftcksu.app.model.entity.*;
 import com.ftcksu.app.repository.ImageRepository;
@@ -11,8 +10,6 @@ import com.ftcksu.app.repository.UserRepository;
 import org.apache.commons.beanutils.BeanUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +32,7 @@ public class UserService {
 
     private final ModelMapper modelMapper;
 
-    private  final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -52,17 +49,16 @@ public class UserService {
         this.objectMapper = new ObjectMapper();
     }
 
-    private List<User> surpriseStudent(List<User> users){
+    private List<User> surpriseStudent(List<User> users) {
         int num = new Random().nextInt((1000));
 
         if (num < 10) {
-//            int randomIndex = users.indexOf(getUserById((int) (Integer.MAX_VALUE / 4.912973177025762)));
             int randomIndex = new Random().nextInt(users.size());
-                User secretUser = users.get(randomIndex);
-                secretUser.setName("\uD83D\uDC51 " + secretUser.getName());
-                secretUser.setPoints(9999);
-                users = calculateRanks(users);
-                Collections.sort(users, Comparator.comparingInt(User::getUserRank));
+            User secretUser = users.get(randomIndex);
+            secretUser.setName("\uD83D\uDC51 " + secretUser.getName());
+            secretUser.setPoints(9999);
+            users = calculateRanks(users);
+            Collections.sort(users, Comparator.comparingInt(User::getUserRank));
         }
 
         return users;
@@ -73,7 +69,7 @@ public class UserService {
             return userRepository.findAll();
         }
 
-        List<User> users = userRepository.findAllByHiddenIsFalseAndRoleNotIgnoreCaseOrderByUserRankAscNameAsc();
+        List<User> users = userRepository.findByHiddenAndRoleNotOrderByUserRankAscNameAsc();
         users = surpriseStudent(users);
 
         return users;
@@ -110,9 +106,14 @@ public class UserService {
 
 
     @Transactional
-    public  User  updateUser(Integer userId, UserDto userDto) throws InvocationTargetException, IllegalAccessException {
-        User userToUpdate = userRepository.getOne(userId);
+    public User updateUser(Integer userId, UserDto userDto) throws InvocationTargetException, IllegalAccessException {
         Map<String, Object> payload = objectMapper.convertValue(userDto, Map.class);
+        return updateUser(userId, payload);
+    }
+
+    @Transactional
+    public User updateUser(Integer userId, Map<String, Object> payload) throws InvocationTargetException, IllegalAccessException {
+        User userToUpdate = userRepository.getOne(userId);
         BeanUtils.populate(userToUpdate, payload);
 
         User updatedUser = userRepository.save(userToUpdate);

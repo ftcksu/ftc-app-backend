@@ -19,7 +19,6 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class User extends BaseEntity {
-
     private static final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
@@ -55,9 +54,9 @@ public class User extends BaseEntity {
         this.points += points;
     }
 
-//    public void setPassword(String password) {
-//       this.password = encoder.encode(password);
-//    }
+    public void setPassword(String password) {
+        this.password = encoder.encode(password);
+    }
 
     public ProfileImage getProfileImage() {
         for (ProfileImage profileImage : imageHistory) {

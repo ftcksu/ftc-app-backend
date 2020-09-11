@@ -21,10 +21,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     List<User> findAllByHiddenIsFalseAndRoleNotIgnoreCaseOrderByPointsDesc(String role);
 
-    default List<User> findAllByHiddenIsFalseAndRoleNotIgnoreCaseOrderByUserRankAscNameAsc() {
-        return findAllByHiddenIsFalseAndRoleNotIgnoreCaseOrderByUserRankAscNameAsc("ROLE_ADMIN");
+    default List<User> findByHiddenAndRoleNotOrderByUserRankAscNameAsc() {
+        return findByHiddenAndRoleNotOrderByUserRankAscNameAsc(false, "ROLE_ADMIN");
     }
 
-    List<User> findAllByHiddenIsFalseAndRoleNotIgnoreCaseOrderByUserRankAscNameAsc(String role);
+    List<User> findByHiddenAndRoleNotOrderByUserRankAscNameAsc(boolean hidden, String role);
 
 }
