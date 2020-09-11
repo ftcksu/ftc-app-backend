@@ -67,6 +67,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // User Related Protected Endpoints:
                 .mvcMatchers(HttpMethod.GET, "/users/{id}", "/users/{id}/image-history", "/users/{id}/jobs")
                 .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
+                .mvcMatchers(HttpMethod.POST, "/users/{id}/events")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
                 .mvcMatchers(HttpMethod.PUT, "/users/{id}/**")
                 .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
 
