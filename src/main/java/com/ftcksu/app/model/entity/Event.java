@@ -34,7 +34,7 @@ public class Event extends BaseEntity {
 
     private String whatsAppLink;
 
-    private int maxUsers;
+    private Integer maxUsers;
 
     private String location;
 
@@ -58,6 +58,8 @@ public class Event extends BaseEntity {
     public void setUsers(List<User> users) {
         this.users.addAll(users);
     }
+
+    public void setLeaderId(Integer id){this.leader = new User(id);}
 
     public boolean isFull() {
         return users.size() >= maxUsers;

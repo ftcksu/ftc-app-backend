@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ftcksu.app.model.entity.ApprovalStatus;
 import lombok.*;
 
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,7 +13,7 @@ public class TaskDto {
 
     private Integer id;
     private String description;
-    private int points;
+    private Integer points;
     private ApprovalStatus approvalStatus = ApprovalStatus.READY;
 
 }

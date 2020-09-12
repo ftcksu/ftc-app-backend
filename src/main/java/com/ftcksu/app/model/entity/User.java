@@ -33,7 +33,7 @@ public class User extends BaseEntity {
     private String password;
     private String bio;
     private String role;
-    private int points;
+    private Integer points;
     private int userRank;
     private boolean hidden;
     private String deviceToken;
@@ -55,9 +55,9 @@ public class User extends BaseEntity {
         this.points += points;
     }
 
-//    public void setPassword(String password) {
-//       this.password = encoder.encode(password);
-//    }
+    public void setPassword(String password) {
+       this.password = encoder.encode(password);
+    }
 
     public ProfileImage getProfileImage() {
         for (ProfileImage profileImage : imageHistory) {

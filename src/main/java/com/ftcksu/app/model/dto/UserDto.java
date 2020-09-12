@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import javax.validation.constraints.Size;
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
