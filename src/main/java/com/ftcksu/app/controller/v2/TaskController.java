@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/v2/tasks")
+@RequestMapping(value = "/tasks")
 public class TaskController {
 
     private final JobService jobService;

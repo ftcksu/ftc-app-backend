@@ -2,7 +2,6 @@ package com.ftcksu.app.controller.v2;
 
 import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.dto.UserDto;
-
 import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.model.request.PushNotificationRequest;
 import com.ftcksu.app.model.response.PushNotificationResponse;
@@ -17,23 +16,20 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
+import java.util.Map;
 
 
 @RestController
-@RequestMapping(value = "/v2/users")
+@RequestMapping(value = "/users")
 public class UserController {
-
     private final UserService userService;
-
     private final JobService jobService;
-
     private final EventService eventService;
-
     private final StorageService storageService;
-
     private final PushNotificationService pushNotificationService;
 
     @Autowired
@@ -64,7 +60,6 @@ public class UserController {
         return ResponseEntity.ok(new ResponseTemplate<>(userService.getUserById(id)));
     }
 
-    //    TODO: check the header throws
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody @Valid UserDto userDto)
             throws InvocationTargetException, IllegalAccessException {
@@ -87,19 +82,30 @@ public class UserController {
         return ResponseEntity.ok(new ResponseTemplate<>("Admin job submitted successfully."));
     }
 
+    @PutMapping("/{id}/admin-update")
+    public ResponseEntity<?> updateUserAsAdmin(@PathVariable Integer id, @RequestBody Map<String, Object> payload)
+            throws InvocationTargetException, IllegalAccessException {
+        return ResponseEntity.ok(new ResponseTemplate<>("User updated successfully.",
+                userService.updateUser(id, payload)));
+    }
+
     @GetMapping("/{id}/events")
     public ResponseEntity<?> getEvents(@PathVariable Integer id,
                                        @RequestParam(name = "leader", defaultValue = "false") Boolean leader) {
         return ResponseEntity.ok(new ResponseTemplate<>(eventService.getEventsByUser(id, leader)));
     }
 
-    // TODO: check if it's possible to remove the if statement
+    @PostMapping("/{id}/events")
+    public ResponseEntity<?> addUserToEvent(@PathVariable Integer id,
+                                            @RequestParam(name = "event_id") Integer eventId) {
+        return ResponseEntity.ok(new ResponseTemplate<>(eventService.addUserToEvent(eventId, id)));
+    }
+
     @PostMapping("/{id}/notify")
     public ResponseEntity<?> notifyUser(@PathVariable Integer id, @RequestBody PushNotificationRequest request) {
         String deviceToken = userService.getUserById(id).getDeviceToken();
         if (deviceToken == null) {
-            return new ResponseEntity<>(new PushNotificationResponse(HttpStatus.BAD_REQUEST.value(),
-                    "Notification has failed to send."), HttpStatus.BAD_REQUEST);
+            throw new EntityNotFoundException("Notification has failed to send.");
         }
         request.setToken(userService.getUserById(id).getDeviceToken());
         pushNotificationService.sendPushNotificationToToken(request);

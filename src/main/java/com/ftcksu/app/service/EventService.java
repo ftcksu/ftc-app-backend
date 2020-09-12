@@ -9,7 +9,6 @@ import com.ftcksu.app.repository.EventRepository;
 import com.ftcksu.app.repository.JobRepository;
 import com.ftcksu.app.repository.UserRepository;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,9 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityExistsException;
 import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class EventService {
@@ -32,7 +31,8 @@ public class EventService {
 
     private final ModelMapper modelMapper;
 
-    private  final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+
     @Autowired
     public EventService(EventRepository eventRepository, JobRepository jobRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
@@ -42,32 +42,30 @@ public class EventService {
         this.objectMapper = new ObjectMapper();
     }
 
-
     public List<Event> getAllEvents() {
         return eventRepository.findEventsByOrderByCreatedAtDesc();
     }
-
 
     public List<Event> getEventsByUser(Integer userId, boolean leader) {
         return leader ? eventRepository.findEventsByLeaderEqualsOrderByCreatedAtDesc(new User(userId)) :
                 eventRepository.findEventsByUsersContainingOrderByCreatedAtDesc(new User(userId));
     }
 
-
     public List<Job> getJobsByEvent(Event event) {
         return jobRepository.findJobsByEventEqualsOrderByCreatedAtAsc(event);
     }
-
 
     public List<String> getUsersDeviceTokensByEvent(Integer eventId) {
         return eventRepository.findUsersDeviceTokensByEvent(eventId);
     }
 
-
     public Event getEventById(Integer id) {
         return eventRepository.findEventByIdEquals(id);
     }
 
+    public Integer getEventLeader(Integer id) {
+        return eventRepository.findEventLeader(id);
+    }
 
     @Transactional
     public Event createNewEvent(EventDto eventDto) {
@@ -79,7 +77,6 @@ public class EventService {
         return savedEvent;
     }
 
-
     @Transactional
     public User addUserToEvent(Integer eventId, Integer userId) {
 
@@ -88,7 +85,7 @@ public class EventService {
         Set<User> eventUsers = eventToUpdate.getUsers();
 
         if (eventUsers.size() >= eventToUpdate.getMaxUsers() || eventUsers.contains(userToAdd)) {
-            throw new EntityExistsException("could not add the user due to the max size or the user already exist");
+            throw new EntityExistsException("could not add the user due to the max size or the user already exist.");
         }
 
         eventUsers.add(userToAdd);
@@ -103,7 +100,6 @@ public class EventService {
         return userToAdd;
     }
 
-
     @Transactional
     public Event updateEvent(Integer eventId, EventDto eventDto)
             throws InvocationTargetException, IllegalAccessException {
@@ -117,7 +113,6 @@ public class EventService {
         return updatedEvent;
     }
 
-
     @Transactional
     public Event deleteEvent(Integer eventId) {
         Event eventToDelete = eventRepository.findEventByIdEquals(eventId);
@@ -129,7 +124,6 @@ public class EventService {
 
         return eventToDelete;
     }
-
 
     @Transactional
     public User removeUser(Integer eventId, Integer userId) {
@@ -145,5 +139,4 @@ public class EventService {
 
         return userToRemove;
     }
-
 }

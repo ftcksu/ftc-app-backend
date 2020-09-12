@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping(value = "/v2/images")
+@RequestMapping(value = "/images")
 public class ImageController {
 
     private final StorageService storageService;

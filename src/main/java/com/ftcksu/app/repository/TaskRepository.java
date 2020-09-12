@@ -26,4 +26,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             "ORDER BY SUM(t.points) DESC")
     List<?> getUserOfTheMonth(Date startDate, Date endDate);
 
+    @Query("SELECT t.taskJob.user.id FROM Task t WHERE t.id = :id")
+    Integer findTaskOwner(Integer id);
+
 }

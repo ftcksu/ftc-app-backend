@@ -1,8 +1,5 @@
 package com.ftcksu.app.service;
 
-import com.ftcksu.app.model.entity.Event;
-import com.ftcksu.app.model.entity.Job;
-import com.ftcksu.app.model.entity.Task;
 import com.ftcksu.app.model.request.AuthenticationRequest;
 import com.ftcksu.app.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,34 +52,17 @@ public class SecurityService {
 
     @Transactional
     public boolean isEventLeader(Integer eventId) {
-        // TODO: Replace with a getEventLeader method.
-        Event event = eventService.getEventById(eventId);
-        return event != null ? getLoggedUserId().equals(event.getLeader().getId()) : false;
+        return getLoggedUserId().equals(eventService.getEventLeader(eventId));
     }
 
     @Transactional
     public boolean isJobOwner(Integer jobId) {
-        // TODO: Replace with a getJobOwner method.
-        Job job = jobService.getJobById(jobId);
-        if (job == null) {
-            return false;
-        }
-
-        Event jobEvent = job.getEvent();
-        boolean eventLeader = false;
-        if (jobEvent != null) {
-            // TODO: Replace with a getEventLeader method.
-            eventLeader = getLoggedUserId().equals(jobEvent.getLeader().getId());
-        }
-
-        return eventLeader || getLoggedUserId().equals(job.getUser().getId());
+        return getLoggedUserId().equals(jobService.getJobOwner(jobId));
     }
 
     @Transactional
     public boolean isTaskOwner(Integer taskId) {
-        // TODO: Replace with a getJobOwner method.
-        Task task = jobService.getTaskById(taskId);
-        return task != null ? getLoggedUserId().equals(task.getTaskJob().getUser().getId()) : false;
+        return getLoggedUserId().equals(jobService.getTaskOwner(taskId));
     }
 
     @Transactional

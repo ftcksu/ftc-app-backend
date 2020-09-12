@@ -1,36 +1,43 @@
 package com.ftcksu.app.controller.v2;
 
-import com.ftcksu.app.exception.exceptionResponse.ErrorResponse;
 import com.ftcksu.app.model.dto.EventDto;
+import com.ftcksu.app.model.dto.TaskDto;
+import com.ftcksu.app.model.entity.ApprovalStatus;
 import com.ftcksu.app.model.entity.Event;
 import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.model.request.PushNotificationRequest;
 import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.EventService;
+import com.ftcksu.app.service.JobService;
 import com.ftcksu.app.service.PushNotificationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityExistsException;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/v2/events")
+@RequestMapping(value = "/events")
+@Slf4j
 public class EventController {
 
     private final EventService eventService;
+
+    private final JobService jobService;
 
     private final PushNotificationService pushNotificationService;
 
     @Autowired
     public EventController(EventService eventService,
+                           JobService jobService,
                            PushNotificationService pushNotificationService) {
         this.eventService = eventService;
+        this.jobService = jobService;
         this.pushNotificationService = pushNotificationService;
     }
 
@@ -41,7 +48,7 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity<?> addEvent(@RequestBody @Valid EventDto eventDto) {
-        return ResponseEntity.ok(new ResponseTemplate<>("Event added successfully.",eventService.createNewEvent(eventDto)));
+        return ResponseEntity.ok(new ResponseTemplate<>("Event added successfully.", eventService.createNewEvent(eventDto)));
     }
 
     @GetMapping("/{id}")
@@ -52,17 +59,28 @@ public class EventController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto)
             throws InvocationTargetException, IllegalAccessException, ParseException {
-        return ResponseEntity.ok(new ResponseTemplate<>("Event updated successfully.",eventService.updateEvent(id, eventDto)));
+        return ResponseEntity.ok(new ResponseTemplate<>("Event updated successfully.", eventService.updateEvent(id, eventDto)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEvent(@PathVariable Integer id) {
-        return ResponseEntity.ok(new ResponseTemplate<>("Event deleted successfully.",eventService.deleteEvent(id)));
+        return ResponseEntity.ok(new ResponseTemplate<>("Event deleted successfully.", eventService.deleteEvent(id)));
     }
 
     @GetMapping("/{id}/jobs")
     public ResponseEntity<?> getEventJobs(@PathVariable Integer id) {
         return ResponseEntity.ok(new ResponseTemplate<>(eventService.getJobsByEvent(new Event(id))));
+    }
+
+    @PutMapping("/{id}/jobs")
+    public ResponseEntity<?> updateEventTask(@PathVariable Integer id,
+                                             @RequestParam(name = "task_id") Integer taskId,
+                                             @RequestParam(name = "approval_status") ApprovalStatus approvalStatus)
+            throws InvocationTargetException, IllegalAccessException {
+        TaskDto taskDto = TaskDto.builder()
+                .approvalStatus(approvalStatus.equals(ApprovalStatus.READY) ? ApprovalStatus.READY : ApprovalStatus.UNAPPROVED)
+                .build();
+        return ResponseEntity.ok(new ResponseTemplate<>(jobService.updateTask(taskId, taskDto)));
     }
 
     @GetMapping("/{id}/users")
@@ -72,13 +90,21 @@ public class EventController {
 
     @PostMapping("/{id}/user")
     public ResponseEntity<?> addUserToEvent(@PathVariable Integer id, @RequestParam(value = "user_id") Integer userId) {
-        return ResponseEntity.ok(new ResponseTemplate<>("User added successfully.",eventService.addUserToEvent(id, userId)));
+        return ResponseEntity.ok(new ResponseTemplate<>("User added successfully.", eventService.addUserToEvent(id, userId)));
     }
 
     @PostMapping("/{id}/users")
     public ResponseEntity<?> addUsersToEvent(@PathVariable Integer id, @RequestBody List<User> users) {
-        users.forEach(user->eventService.addUserToEvent(id, user.getId()));
-        return ResponseEntity.ok(new ResponseTemplate<>("Users added successfully."));
+        int addedUsers = 0;
+        for (User user : users) {
+            try {
+                eventService.addUserToEvent(id, user.getId());
+                addedUsers++;
+            } catch (EntityExistsException ex) {
+                log.error(ex.getMessage());
+            }
+        }
+        return ResponseEntity.ok(new ResponseTemplate<>(addedUsers + " users added successfully.", addedUsers));
     }
 
     @PostMapping("/{id}/broadcast")
@@ -92,7 +118,7 @@ public class EventController {
 
     @DeleteMapping("/{id}/users")
     public ResponseEntity<?> removeUserFromEvent(@PathVariable Integer id, @RequestParam("user_id") Integer userId) {
-        return ResponseEntity.ok(new ResponseTemplate<>("User removed successfully.",eventService.removeUser(id, userId)));
+        return ResponseEntity.ok(new ResponseTemplate<>("User removed successfully.", eventService.removeUser(id, userId)));
     }
 
 }

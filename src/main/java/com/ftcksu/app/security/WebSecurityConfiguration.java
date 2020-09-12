@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -58,7 +59,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .mvcMatchers(HttpMethod.POST, "/users", "/users/{id}/jobs/admin-submit", "/jobs",
                         "/users/{id}/notify", "/notifications/**")
                 .hasAnyRole("ADMIN", "MAINTAIN")
-                .mvcMatchers(HttpMethod.PUT, "/images/pending")
+                .mvcMatchers(HttpMethod.PUT, "/images/pending", "/users/{id}/admin-update")
                 .hasAnyRole("ADMIN", "MAINTAIN")
                 .mvcMatchers(HttpMethod.DELETE, "/users/{id}", "/events/{id}", "/jobs/{id}", "/tasks/{id}",
                         "/images/{id}", "/motd/{id}")
@@ -66,6 +67,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 // User Related Protected Endpoints:
                 .mvcMatchers(HttpMethod.GET, "/users/{id}", "/users/{id}/image-history", "/users/{id}/jobs")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
+                .mvcMatchers(HttpMethod.POST, "/users/{id}/events")
                 .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
                 .mvcMatchers(HttpMethod.PUT, "/users/{id}/**")
                 .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
@@ -101,5 +104,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public AuthenticationManager getAuthenticationManager() throws Exception {
         return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

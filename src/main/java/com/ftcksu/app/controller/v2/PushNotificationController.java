@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/v2/notifications")
+@RequestMapping(value = "/notifications")
 public class PushNotificationController {
 
     private final PushNotificationService pushNotificationService;

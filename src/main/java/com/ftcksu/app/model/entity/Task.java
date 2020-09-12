@@ -39,5 +39,4 @@ public class Task extends BaseEntity {
         this.description = description;
         this.taskJob = taskJob;
     }
-
 }
