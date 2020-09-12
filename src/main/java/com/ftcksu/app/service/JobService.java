@@ -13,16 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class JobService {
-
-
-    // TODO: Change void to boolean to check if the method worked.
 
     private final JobRepository jobRepository;
 
@@ -48,6 +44,13 @@ public class JobService {
         return jobRepository.findJobsByUserEqualsOrderByUpdatedAtDesc(user);
     }
 
+    public Integer getJobOwner(Integer id) {
+        return jobRepository.findJobOwner(id);
+    }
+
+    public Integer getTaskOwner(Integer id) {
+        return taskRepository.findTaskOwner(id);
+    }
 
     public List<Job> getJobsByType(JobType jobType) {
         return jobRepository.findJobsByJobType(jobType);
@@ -121,13 +124,13 @@ public class JobService {
     @Transactional
     public Task updateTask(Integer taskId, TaskDto taskDto)
             throws InvocationTargetException, IllegalAccessException {
-
         Task taskToUpdate = taskRepository.getOne(taskId);
         Map<String, Object> payload = objectMapper.convertValue(taskDto, Map.class);
 
-        if (payload.containsKey("approval_status")) {
+        if (payload.containsKey("approvalStatus")) {
             taskToUpdate.setApprovalStatus(Enum.valueOf(ApprovalStatus.class,
-                    (String) payload.get("approval_status")));
+                    (String) payload.get("approvalStatus")));
+            payload.remove("approvalStatus");
         }
 
         BeanUtils.populate(taskToUpdate, payload);

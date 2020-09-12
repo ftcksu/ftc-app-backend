@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
+import javax.persistence.EntityNotFoundException;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -156,8 +157,7 @@ public class StorageService {
         ProfileImage profileImage = user.getProfileImage();
 
         if (profileImage == null) {
-            // TODO: Replace this later and make it return null so the front-end can apply default image.
-            return null;
+            throw new EntityNotFoundException("User has no image.");
         }
 
         String fileName = isThumbnail ? profileImage.getThumbName() : profileImage.getImageName();

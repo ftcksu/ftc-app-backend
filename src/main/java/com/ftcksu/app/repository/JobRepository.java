@@ -20,6 +20,9 @@ public interface JobRepository extends JpaRepository<Job, Integer> {
     @Query("SELECT j FROM Job j WHERE j.jobType = :jobType AND j.user.hidden = false ORDER BY j.updatedAt DESC")
     List<Job> findJobsByJobType(JobType jobType);
 
+    @Query("SELECT j.user.id FROM Job j WHERE j.id = :id")
+    Integer findJobOwner(Integer id);
+
     Job findJobByIdEquals(Integer id);
 
     default Job findJobByUserEqualsAndJobTypeEquals(User user) {

@@ -1,11 +1,14 @@
 package com.ftcksu.app.controller.v2;
 
 import com.ftcksu.app.model.dto.EventDto;
+import com.ftcksu.app.model.dto.TaskDto;
+import com.ftcksu.app.model.entity.ApprovalStatus;
 import com.ftcksu.app.model.entity.Event;
 import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.model.request.PushNotificationRequest;
 import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.EventService;
+import com.ftcksu.app.service.JobService;
 import com.ftcksu.app.service.PushNotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +28,16 @@ public class EventController {
 
     private final EventService eventService;
 
+    private final JobService jobService;
+
     private final PushNotificationService pushNotificationService;
 
     @Autowired
     public EventController(EventService eventService,
+                           JobService jobService,
                            PushNotificationService pushNotificationService) {
         this.eventService = eventService;
+        this.jobService = jobService;
         this.pushNotificationService = pushNotificationService;
     }
 
@@ -63,6 +70,17 @@ public class EventController {
     @GetMapping("/{id}/jobs")
     public ResponseEntity<?> getEventJobs(@PathVariable Integer id) {
         return ResponseEntity.ok(new ResponseTemplate<>(eventService.getJobsByEvent(new Event(id))));
+    }
+
+    @PutMapping("/{id}/jobs")
+    public ResponseEntity<?> updateEventTask(@PathVariable Integer id,
+                                             @RequestParam(name = "task_id") Integer taskId,
+                                             @RequestParam(name = "approval_status") ApprovalStatus approvalStatus)
+            throws InvocationTargetException, IllegalAccessException {
+        TaskDto taskDto = TaskDto.builder()
+                .approvalStatus(approvalStatus.equals(ApprovalStatus.READY) ? ApprovalStatus.READY : ApprovalStatus.UNAPPROVED)
+                .build();
+        return ResponseEntity.ok(new ResponseTemplate<>(jobService.updateTask(taskId, taskDto)));
     }
 
     @GetMapping("/{id}/users")

@@ -12,7 +12,7 @@ spring:
     hibernate:
       ddl-auto: update
     generate-ddl: on
-    show-sql: on
+    show-sql: off
     properties:
       hibernate.format_sql: true
   jackson:

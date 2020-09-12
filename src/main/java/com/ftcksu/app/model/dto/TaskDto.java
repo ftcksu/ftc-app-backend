@@ -2,9 +2,12 @@ package com.ftcksu.app.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ftcksu.app.model.entity.ApprovalStatus;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
