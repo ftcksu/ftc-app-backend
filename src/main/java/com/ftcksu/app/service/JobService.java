@@ -131,9 +131,20 @@ public class JobService {
     public Task updateTask(Integer taskId, Map<String, Object> payload) throws InvocationTargetException, IllegalAccessException {
         Task taskToUpdate = taskRepository.getOne(taskId);
 
+        Job jobToUpdate = taskToUpdate.getTaskJob();
+        jobToUpdate.setUpdatedAt(new Date());
+        jobRepository.save(jobToUpdate);
+
         if (payload.containsKey("approval_status")) {
             taskToUpdate.setApprovalStatus(Enum.valueOf(ApprovalStatus.class,
                     (String) payload.get("approval_status")));
+            payload.remove("approval_status");
+        }
+
+        if (payload.containsKey("approvalStatus")) {
+            taskToUpdate.setApprovalStatus(Enum.valueOf(ApprovalStatus.class,
+                    (String) payload.get("approvalStatus")));
+            payload.remove("approvalStatus");
         }
 
         BeanUtils.populate(taskToUpdate, payload);
@@ -143,18 +154,13 @@ public class JobService {
             userService.updatePoints(taskToUpdate.getTaskJob().getUser().getId(), (int) payload.get("points"));
         }
 
-        Job jobToUpdate = taskToUpdate.getTaskJob();
-        jobToUpdate.setUpdatedAt(new Date());
-        jobRepository.save(jobToUpdate);
-
         return updatedTask;
     }
-
 
     @Transactional
     public Task addTaskToAdminJob(Integer userId, Task task) {
         User user = userService.updatePoints(userId, task.getPoints());
-        Job adminJob = jobRepository.findJobByUserEqualsAndJobTypeEquals(user);
+        Job adminJob = jobRepository.findFirstByUserEqualsAndJobTypeEquals(user);
         adminJob.setUpdatedAt(new Date());
         jobRepository.save(adminJob);
 
@@ -163,7 +169,7 @@ public class JobService {
         Task addedTask = taskRepository.save(task);
 
         // Update user's self job so it fixes order in the admin page.
-        Job jobToUpdate = jobRepository.findJobByUserEqualsAndJobTypeEquals(user, JobType.SELF);
+        Job jobToUpdate = jobRepository.findFirstByUserEqualsAndJobTypeEquals(user, JobType.SELF);
         jobToUpdate.setUpdatedAt(new Date());
         jobRepository.save(jobToUpdate);
 
