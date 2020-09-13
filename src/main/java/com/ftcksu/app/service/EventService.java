@@ -79,7 +79,6 @@ public class EventService {
 
     @Transactional
     public User addUserToEvent(Integer eventId, Integer userId) {
-
         User userToAdd = userRepository.findUserByIdEquals(userId);
         Event eventToUpdate = eventRepository.findEventByIdEquals(eventId);
         Set<User> eventUsers = eventToUpdate.getUsers();

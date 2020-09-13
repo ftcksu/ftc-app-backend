@@ -25,11 +25,11 @@ public interface JobRepository extends JpaRepository<Job, Integer> {
 
     Job findJobByIdEquals(Integer id);
 
-    default Job findJobByUserEqualsAndJobTypeEquals(User user) {
-        return findJobByUserEqualsAndJobTypeEquals(user, JobType.ADMIN);
+    default Job findFirstByUserEqualsAndJobTypeEquals(User user) {
+        return findFirstByUserEqualsAndJobTypeEquals(user, JobType.ADMIN);
     }
 
-    Job findJobByUserEqualsAndJobTypeEquals(User user, JobType jobType);
+    Job findFirstByUserEqualsAndJobTypeEquals(User user, JobType jobType);
 
     boolean existsJobByUserEqualsAndEventEquals(User user, Event Event);
 
