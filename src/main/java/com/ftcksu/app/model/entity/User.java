@@ -29,7 +29,7 @@ public class User extends BaseEntity {
     private String password;
     private String bio;
     private String role;
-    private Integer points;
+    private int points;
     private int userRank;
     private boolean hidden;
     private String deviceToken;

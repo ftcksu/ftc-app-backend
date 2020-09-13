@@ -26,4 +26,10 @@ public class PushNotificationRequest {
         this.message = message;
         this.tokens = tokens;
     }
+
+    public PushNotificationRequest(String title, List<String> tokens) {
+        this.title = title;
+        this.message = "نزلت فعالية جديدة تعال شفها";
+        this.tokens = tokens;
+    }
 }

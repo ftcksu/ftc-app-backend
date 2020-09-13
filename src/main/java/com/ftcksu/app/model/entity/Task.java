@@ -24,7 +24,7 @@ public class Task extends BaseEntity {
     @NotNull
     private String description;
 
-    private Integer points;
+    private int points;
 
     private ApprovalStatus approvalStatus = ApprovalStatus.READY;
 

@@ -53,7 +53,7 @@ public class EventController {
         if (notifyUsers) {
             List<String> deviceTokens = userService.getUsersDeviceTokens();
             PushNotificationRequest request = new PushNotificationRequest(createdEvent.getTitle(),
-                    createdEvent.getDescription(), deviceTokens);
+                     deviceTokens);
             pushNotificationService.sendPushNotificationToMultipleTokens(request);
         }
 

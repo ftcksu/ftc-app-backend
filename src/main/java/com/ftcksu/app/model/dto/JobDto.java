@@ -18,5 +18,4 @@ public class JobDto {
     private Integer userId;
     private JobType jobType = JobType.EVENT;
 
-
 }

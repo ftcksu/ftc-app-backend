@@ -67,4 +67,10 @@ public class Event extends BaseEntity {
         return users.size() >= maxUsers;
     }
 
+    public void setMaxUsers(Integer maxUsers){
+        if(maxUsers!=null)
+            this.maxUsers =maxUsers;
+        else
+            this.maxUsers =1;
+    }
 }
