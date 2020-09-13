@@ -64,6 +64,10 @@ public class Job extends BaseEntity {
         this.user = user;
     }
 
+    public void setUserId(Integer id) {
+        this.user = new User(id);
+    }
+
     public boolean getEventStatus() {
         return event != null ? event.isFinished() : false;
     }

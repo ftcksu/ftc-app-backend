@@ -16,7 +16,7 @@ public class TaskDto {
 
     private Integer id;
     private String description;
-    private int points;
+    private Integer points;
     private ApprovalStatus approvalStatus = ApprovalStatus.READY;
 
 }

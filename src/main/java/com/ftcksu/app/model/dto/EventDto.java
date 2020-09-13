@@ -1,16 +1,14 @@
 package com.ftcksu.app.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.ftcksu.app.model.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Pattern;
 import java.util.Date;
 
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,10 +17,9 @@ public class EventDto {
     private String title;
     private String description;
     private Date date;
-    @Pattern(regexp = ".*chat.whatsapp.com/.*",message = "Invalid whatsapp link")
     private String whatsAppLink;
-    private int maxUsers;
+    private Integer maxUsers;
     private String location;
-    private User leader;
+    private Integer leaderId;
     private boolean finished;
 }

@@ -71,8 +71,8 @@ public class EventService {
     public Event createNewEvent(EventDto eventDto) {
         Event eventToCreate = modelMapper.map(eventDto, Event.class);
 
-        eventToCreate.getUsers().add(eventToCreate.getLeader());
         Event savedEvent = eventRepository.save(eventToCreate);
+        addUserToEvent(savedEvent.getId(), savedEvent.getLeader().getId());
 
         return savedEvent;
     }
