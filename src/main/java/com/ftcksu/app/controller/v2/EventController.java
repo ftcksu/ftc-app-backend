@@ -4,12 +4,12 @@ import com.ftcksu.app.model.dto.EventDto;
 import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.entity.ApprovalStatus;
 import com.ftcksu.app.model.entity.Event;
-import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.model.request.PushNotificationRequest;
 import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.EventService;
 import com.ftcksu.app.service.JobService;
 import com.ftcksu.app.service.PushNotificationService;
+import com.ftcksu.app.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,27 +18,26 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityExistsException;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "/events")
 @Slf4j
 public class EventController {
-
     private final EventService eventService;
-
     private final JobService jobService;
-
     private final PushNotificationService pushNotificationService;
+    private final UserService userService;
 
     @Autowired
     public EventController(EventService eventService,
                            JobService jobService,
-                           PushNotificationService pushNotificationService) {
+                           PushNotificationService pushNotificationService,
+                           UserService userService) {
         this.eventService = eventService;
         this.jobService = jobService;
         this.pushNotificationService = pushNotificationService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -47,8 +46,18 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addEvent(@RequestBody @Valid EventDto eventDto) {
-        return ResponseEntity.ok(new ResponseTemplate<>("Event added successfully.", eventService.createNewEvent(eventDto)));
+    public ResponseEntity<?> addEvent(@RequestBody @Valid EventDto eventDto,
+                                      @RequestParam(name = "notify_users", defaultValue = "false") boolean notifyUsers) {
+        Event createdEvent = eventService.createNewEvent(eventDto);
+
+        if (notifyUsers) {
+            List<String> deviceTokens = userService.getUsersDeviceTokens();
+            PushNotificationRequest request = new PushNotificationRequest(createdEvent.getTitle(),
+                    createdEvent.getDescription(), deviceTokens);
+            pushNotificationService.sendPushNotificationToMultipleTokens(request);
+        }
+
+        return ResponseEntity.ok(new ResponseTemplate<>("Event added successfully.", createdEvent));
     }
 
     @GetMapping("/{id}")
@@ -58,7 +67,7 @@ public class EventController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto)
-            throws InvocationTargetException, IllegalAccessException, ParseException {
+            throws InvocationTargetException, IllegalAccessException {
         return ResponseEntity.ok(new ResponseTemplate<>("Event updated successfully.", eventService.updateEvent(id, eventDto)));
     }
 
@@ -94,11 +103,11 @@ public class EventController {
     }
 
     @PostMapping("/{id}/users")
-    public ResponseEntity<?> addUsersToEvent(@PathVariable Integer id, @RequestBody List<User> users) {
+    public ResponseEntity<?> addUsersToEvent(@PathVariable Integer id, @RequestBody List<Integer> users) {
         int addedUsers = 0;
-        for (User user : users) {
+        for (Integer userId : users) {
             try {
-                eventService.addUserToEvent(id, user.getId());
+                eventService.addUserToEvent(id, userId);
                 addedUsers++;
             } catch (EntityExistsException ex) {
                 log.error(ex.getMessage());

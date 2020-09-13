@@ -20,4 +20,10 @@ public class PushNotificationRequest {
         this.message = message;
         this.token = token;
     }
+
+    public PushNotificationRequest(String title, String message, List<String> tokens) {
+        this.title = title;
+        this.message = message;
+        this.tokens = tokens;
+    }
 }
