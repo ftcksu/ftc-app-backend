@@ -59,7 +59,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .mvcMatchers(HttpMethod.POST, "/users", "/users/{id}/jobs/admin-submit", "/jobs",
                         "/users/{id}/notify", "/notifications/**")
                 .hasAnyRole("ADMIN", "MAINTAIN")
-                .mvcMatchers(HttpMethod.PUT, "/images/pending", "/users/{id}/admin-update")
+                .mvcMatchers(HttpMethod.PUT, "/images/pending", "/users/{id}/admin-update", "/tasks/{id}/admin-update")
                 .hasAnyRole("ADMIN", "MAINTAIN")
                 .mvcMatchers(HttpMethod.DELETE, "/users/{id}", "/events/{id}", "/jobs/{id}", "/tasks/{id}",
                         "/images/{id}", "/motd/{id}")

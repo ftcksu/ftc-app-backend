@@ -1,7 +1,7 @@
 package com.ftcksu.app.controller.v2;
 
-import com.ftcksu.app.model.dto.TaskDto;
 import com.ftcksu.app.model.dto.UserDto;
+import com.ftcksu.app.model.entity.Task;
 import com.ftcksu.app.model.entity.User;
 import com.ftcksu.app.model.request.PushNotificationRequest;
 import com.ftcksu.app.model.response.PushNotificationResponse;
@@ -77,9 +77,9 @@ public class UserController {
     }
 
     @PostMapping("/{id}/jobs/admin-submit")
-    public ResponseEntity<?> submitAdminJob(@PathVariable Integer id, @RequestBody @Valid TaskDto taskDto) {
-        jobService.addTaskToAdminJob(id, taskDto);
-        return ResponseEntity.ok(new ResponseTemplate<>("Admin job submitted successfully."));
+    public ResponseEntity<?> submitAdminJob(@PathVariable Integer id, @RequestBody Task task) {
+        return ResponseEntity.ok(new ResponseTemplate<>("Admin job submitted successfully.",
+                jobService.addTaskToAdminJob(id, task)));
     }
 
     @PutMapping("/{id}/admin-update")

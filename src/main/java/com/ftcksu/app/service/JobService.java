@@ -41,7 +41,7 @@ public class JobService {
 
 
     public List<Job> getJobsByUser(User user) {
-        return jobRepository.findJobsByUserEqualsOrderByUpdatedAtDesc(user);
+        return jobRepository.findJobsByUserEqualsOrderByCreatedAtDesc(user);
     }
 
     public Integer getJobOwner(Integer id) {
@@ -99,7 +99,7 @@ public class JobService {
         // Update "updated_at" column that's in the job table.
         Job jobToUpdate = jobRepository.getOne(jobId);
         jobToUpdate.setUpdatedAt(new Date());
-        jobRepository.save(jobToUpdate);
+        jobToUpdate = jobRepository.save(jobToUpdate);
 
         Task task = modelMapper.map(taskDto, Task.class);
         task.setTaskJob(jobToUpdate);
@@ -108,12 +108,11 @@ public class JobService {
             case SELF:
                 task.setApprovalStatus(ApprovalStatus.READY);
                 break;
-            case ADMIN:
-                task.setApprovalStatus(ApprovalStatus.APPROVED);
-                userService.updatePoints(jobToUpdate.getUser().getId(), task.getPoints());
-                break;
             case EVENT:
                 task.setApprovalStatus(ApprovalStatus.WAITING);
+                break;
+            case ADMIN:
+                task.setApprovalStatus(ApprovalStatus.APPROVED);
         }
 
         Task addedTask = taskRepository.save(task);
@@ -124,13 +123,17 @@ public class JobService {
     @Transactional
     public Task updateTask(Integer taskId, TaskDto taskDto)
             throws InvocationTargetException, IllegalAccessException {
-        Task taskToUpdate = taskRepository.getOne(taskId);
         Map<String, Object> payload = objectMapper.convertValue(taskDto, Map.class);
+        return updateTask(taskId, payload);
+    }
 
-        if (payload.containsKey("approvalStatus")) {
+    @Transactional
+    public Task updateTask(Integer taskId, Map<String, Object> payload) throws InvocationTargetException, IllegalAccessException {
+        Task taskToUpdate = taskRepository.getOne(taskId);
+
+        if (payload.containsKey("approval_status")) {
             taskToUpdate.setApprovalStatus(Enum.valueOf(ApprovalStatus.class,
-                    (String) payload.get("approvalStatus")));
-            payload.remove("approvalStatus");
+                    (String) payload.get("approval_status")));
         }
 
         BeanUtils.populate(taskToUpdate, payload);
@@ -149,16 +152,22 @@ public class JobService {
 
 
     @Transactional
-    public void addTaskToAdminJob(Integer userId, TaskDto taskDto) {
-        User user = userService.getUserById(userId);
+    public Task addTaskToAdminJob(Integer userId, Task task) {
+        User user = userService.updatePoints(userId, task.getPoints());
         Job adminJob = jobRepository.findJobByUserEqualsAndJobTypeEquals(user);
+        adminJob.setUpdatedAt(new Date());
+        jobRepository.save(adminJob);
 
-        addTaskToJob(adminJob.getId(), taskDto);
+        task.setApprovalStatus(ApprovalStatus.APPROVED);
+        task.setTaskJob(adminJob);
+        Task addedTask = taskRepository.save(task);
 
         // Update user's self job so it fixes order in the admin page.
         Job jobToUpdate = jobRepository.findJobByUserEqualsAndJobTypeEquals(user, JobType.SELF);
         jobToUpdate.setUpdatedAt(new Date());
         jobRepository.save(jobToUpdate);
+
+        return addedTask;
     }
 
 
@@ -182,5 +191,4 @@ public class JobService {
 
         return taskToDelete;
     }
-
 }

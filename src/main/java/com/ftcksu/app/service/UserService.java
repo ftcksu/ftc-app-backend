@@ -114,8 +114,16 @@ public class UserService {
     @Transactional
     public User updateUser(Integer userId, Map<String, Object> payload) throws InvocationTargetException, IllegalAccessException {
         User userToUpdate = userRepository.getOne(userId);
-        BeanUtils.populate(userToUpdate, payload);
 
+        if (payload.containsKey("device_token")) {
+            payload.put("deviceToken", payload.get("device_token"));
+        }
+
+        if (payload.containsKey("phone_number")) {
+            payload.put("phoneNumber", payload.get("phone_number"));
+        }
+
+        BeanUtils.populate(userToUpdate, payload);
         User updatedUser = userRepository.save(userToUpdate);
         return updatedUser;
     }
@@ -125,7 +133,7 @@ public class UserService {
     public User deleteUser(Integer userId) {
         User userToDelete = userRepository.findUserByIdEquals(userId);
         List<Event> userEvents = userToDelete.getEvents();
-        List<Job> userJobs = jobRepository.findJobsByUserEqualsOrderByUpdatedAtDesc(userToDelete);
+        List<Job> userJobs = jobRepository.findJobsByUserEqualsOrderByCreatedAtDesc(userToDelete);
         List<MOTD> userMOTDs = motdRepository.findAllByUserEquals(userToDelete);
 
         userEvents.stream()
@@ -163,11 +171,13 @@ public class UserService {
 
 
     @Transactional
-    public void updatePoints(Integer userId, int points) {
+    public User updatePoints(Integer userId, int points) {
         User userToUpdate = userRepository.getOne(userId);
         userToUpdate.adjustPoints(points);
-        userRepository.save(userToUpdate);
+        userToUpdate = userRepository.save(userToUpdate);
         updateRanks();
+
+        return userToUpdate;
     }
 
     private void updateRanks() {

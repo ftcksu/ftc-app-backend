@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface JobRepository extends JpaRepository<Job, Integer> {
 
-    List<Job> findJobsByUserEqualsOrderByUpdatedAtDesc(User user);
+    List<Job> findJobsByUserEqualsOrderByCreatedAtDesc(User user);
 
     List<Job> findJobsByEventEqualsOrderByCreatedAtAsc(Event event);
 

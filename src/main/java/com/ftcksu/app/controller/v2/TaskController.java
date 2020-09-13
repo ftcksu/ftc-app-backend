@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/tasks")
@@ -35,12 +36,18 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTask(@PathVariable Integer id, @RequestBody @Valid TaskDto taskDto)
             throws InvocationTargetException, IllegalAccessException {
-        return ResponseEntity.ok(new ResponseTemplate<>("Task updated successfully.",jobService.updateTask(id, taskDto)));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task updated successfully.", jobService.updateTask(id, taskDto)));
+    }
+
+    @PutMapping("/{id}/admin-update")
+    public ResponseEntity<?> approveTask(@PathVariable Integer id, @RequestBody Map<String, Object> payload)
+            throws InvocationTargetException, IllegalAccessException {
+        return ResponseEntity.ok(new ResponseTemplate<>("Task updated successfully.", jobService.updateTask(id, payload)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTask(@PathVariable Integer id) {
-        return ResponseEntity.ok(new ResponseTemplate<>("Task deleted successfully.",jobService.deleteTask(id)));
+        return ResponseEntity.ok(new ResponseTemplate<>("Task deleted successfully.", jobService.deleteTask(id)));
     }
 
 }
