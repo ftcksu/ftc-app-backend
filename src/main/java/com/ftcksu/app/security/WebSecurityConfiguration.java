@@ -1,10 +1,12 @@
 package com.ftcksu.app.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ftcksu.app.service.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,7 +15,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -21,19 +32,51 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
     private final SecurityService securityService;
+    private final ObjectMapper mapper;
 
     @Autowired
     public WebSecurityConfiguration(UserDetailsService userDetailsService,
                                     JWTAuthenticationFilter jwtAuthenticationFilter,
-                                    SecurityService securityService) {
+                                    SecurityService securityService,
+                                    ObjectMapper mapper) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.securityService = securityService;
+        this.mapper = mapper;
     }
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService);
+    }
+
+    @Bean
+    public AuthenticationEntryPoint customAuthenticationEntryPoint() {
+        return (httpServletRequest, httpServletResponse, e) -> {
+            HttpStatus status = HttpStatus.UNAUTHORIZED;
+            sendPayload(status, e.getMessage(), httpServletResponse);
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler customAccessDeniedHandler() {
+        return (httpServletRequest, httpServletResponse, e) -> {
+            HttpStatus status = HttpStatus.FORBIDDEN;
+            sendPayload(status, e.getMessage(), httpServletResponse);
+        };
+    }
+
+    private void sendPayload(HttpStatus status, String message, HttpServletResponse httpServletResponse)
+            throws IOException {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("timestamp", new Timestamp(new Date().getTime()));
+        payload.put("status", status.value());
+        payload.put("error", status.name());
+        payload.put("message", message);
+
+        httpServletResponse.setContentType("application/json; charset=UTF-8");
+        httpServletResponse.setStatus(status.value());
+        httpServletResponse.getWriter().write(mapper.writeValueAsString(payload));
     }
 
     @Override
@@ -96,8 +139,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isTaskOwner(#id)")
 
                 .anyRequest().authenticated()
-                .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .and().exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint())
+                .and().exceptionHandling().accessDeniedHandler(customAccessDeniedHandler())
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
