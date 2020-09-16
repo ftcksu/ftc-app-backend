@@ -13,6 +13,8 @@ import com.ftcksu.app.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityExistsException;
@@ -46,14 +48,16 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addEvent(@RequestBody @Valid EventDto eventDto,
+    public ResponseEntity<?> addEvent(@AuthenticationPrincipal UserDetails principal, @RequestBody @Valid EventDto eventDto,
                                       @RequestParam(name = "notify_users", defaultValue = "false") boolean notifyUsers) {
-        Event createdEvent = eventService.createNewEvent(eventDto);
+
+        Integer userId = Integer.parseInt(principal.getUsername());
+        Event createdEvent = eventService.createNewEvent(userId, eventDto);
 
         if (notifyUsers) {
             List<String> deviceTokens = userService.getUsersDeviceTokens();
             PushNotificationRequest request = new PushNotificationRequest(createdEvent.getTitle(),
-                     deviceTokens);
+                    deviceTokens);
             pushNotificationService.sendPushNotificationToMultipleTokens(request);
         }
 

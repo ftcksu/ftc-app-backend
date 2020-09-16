@@ -59,7 +59,7 @@ public class Event extends BaseEntity {
         this.users.addAll(users);
     }
 
-    public void setLeaderId(Integer id) {
+    public void setLeader(Integer id) {
         this.leader = new User(id);
     }
 

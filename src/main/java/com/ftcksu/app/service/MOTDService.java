@@ -23,8 +23,8 @@ public class MOTDService {
 
 
     @Transactional
-    public void createNewMOTD(MOTD motd) {
-        motdRepository.save(motd);
+    public MOTD createNewMOTD(MOTD motd) {
+        return motdRepository.save(motd);
     }
 
 

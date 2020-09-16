@@ -68,9 +68,10 @@ public class EventService {
     }
 
     @Transactional
-    public Event createNewEvent(EventDto eventDto) {
+    public Event createNewEvent(Integer leaderId, EventDto eventDto) {
 
         Event eventToCreate = modelMapper.map(eventDto, Event.class);
+        eventToCreate.setLeader(leaderId);
         Event savedEvent = eventRepository.save(eventToCreate);
 
         addUserToEvent(savedEvent.getId(), savedEvent.getLeader().getId());

@@ -20,6 +20,6 @@ public class EventDto {
     private String whatsAppLink;
     private Integer maxUsers;
     private String location;
-    private Integer leaderId;
     private boolean finished;
+
 }

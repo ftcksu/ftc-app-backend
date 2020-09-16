@@ -20,7 +20,7 @@ public class MOTD extends BaseEntity {
     @NotNull
     private String message;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 

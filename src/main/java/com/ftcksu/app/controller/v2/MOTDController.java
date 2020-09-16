@@ -5,6 +5,8 @@ import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.MOTDService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,7 +26,9 @@ public class MOTDController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addMOTD(@RequestBody MOTD motd) {
+    public ResponseEntity<?> addMOTD(@AuthenticationPrincipal UserDetails principal, @RequestBody MOTD motd) {
+        Integer userId = Integer.parseInt(principal.getUsername());
+        motd.setUserId(userId);
         motdService.createNewMOTD(motd);
         return ResponseEntity.ok(new ResponseTemplate<>("Message of the day added successfully."));
     }

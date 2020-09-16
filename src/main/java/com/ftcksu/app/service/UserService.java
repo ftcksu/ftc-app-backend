@@ -117,10 +117,12 @@ public class UserService {
 
         if (payload.containsKey("device_token")) {
             payload.put("deviceToken", payload.get("device_token"));
+            payload.remove("device_token");
         }
 
         if (payload.containsKey("phone_number")) {
             payload.put("phoneNumber", payload.get("phone_number"));
+            payload.remove("phone_number");
         }
 
         BeanUtils.populate(userToUpdate, payload);

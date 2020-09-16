@@ -59,7 +59,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .mvcMatchers(HttpMethod.POST, "/users", "/users/{id}/jobs/admin-submit", "/jobs",
                         "/users/{id}/notify", "/notifications/**")
                 .hasAnyRole("ADMIN", "MAINTAIN")
-                .mvcMatchers(HttpMethod.PUT, "/images/pending", "/users/{id}/admin-update", "/tasks/{id}/admin-update")
+                .mvcMatchers(HttpMethod.PUT, "/images/pending/{id}", "/users/{id}/admin-update", "/tasks/{id}/admin-update")
                 .hasAnyRole("ADMIN", "MAINTAIN")
                 .mvcMatchers(HttpMethod.DELETE, "/users/{id}", "/events/{id}", "/jobs/{id}", "/tasks/{id}",
                         "/images/{id}", "/motd/{id}")
@@ -68,7 +68,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // User Related Protected Endpoints:
                 .mvcMatchers(HttpMethod.GET, "/users/{id}", "/users/{id}/image-history", "/users/{id}/jobs")
                 .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
-                .mvcMatchers(HttpMethod.POST, "/users/{id}/events")
+                .mvcMatchers(HttpMethod.POST, "/users/{id}/events", "/images/{id}")
                 .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")
                 .mvcMatchers(HttpMethod.PUT, "/users/{id}/**")
                 .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isLoggedUser(#id)")

@@ -36,4 +36,5 @@ public class ResponseTemplate<T> {
         this.message = message;
         this.result = result;
     }
+
 }
