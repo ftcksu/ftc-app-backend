@@ -5,7 +5,7 @@ public enum NotificationParameter {
     SOUND("default"),
     COLOR("#000000");
 
-    private String value;
+    private final String value;
 
     NotificationParameter(String value) {
         this.value = value;

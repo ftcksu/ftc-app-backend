@@ -1,4 +1,4 @@
-package com.ftcksu.app.controller.v2;
+package com.ftcksu.app.controller;
 
 import com.ftcksu.app.model.dto.UserDto;
 import com.ftcksu.app.model.entity.Task;
@@ -52,7 +52,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> addUser(@RequestBody @Valid UserDto userDto) {
-        return ResponseEntity.ok(new ResponseTemplate<>( "User added successfully.",userService.createNewUser(userDto)));
+        return ResponseEntity.ok(new ResponseTemplate<>("User added successfully.", userService.createNewUser(userDto)));
     }
 
     @GetMapping(value = "/{id}")
@@ -63,12 +63,12 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody @Valid UserDto userDto)
             throws InvocationTargetException, IllegalAccessException {
-        return ResponseEntity.ok(new ResponseTemplate<>( "User updated successfully.",userService.updateUser(id, userDto)));
+        return ResponseEntity.ok(new ResponseTemplate<>("User updated successfully.", userService.updateUser(id, userDto)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
-        return ResponseEntity.ok(new ResponseTemplate<>("User deleted successfully.",userService.deleteUser(id)));
+        return ResponseEntity.ok(new ResponseTemplate<>("User deleted successfully.", userService.deleteUser(id)));
     }
 
     @GetMapping("/{id}/jobs")

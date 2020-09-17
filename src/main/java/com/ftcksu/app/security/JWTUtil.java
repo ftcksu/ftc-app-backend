@@ -18,7 +18,7 @@ import java.util.Map;
 @Component
 public class JWTUtil {
     private static final long JWT_TOKEN_VALIDITY = 7 * 24 * 60 * 60;
-    private Key SECRET_KEY;
+    private final Key SECRET_KEY;
 
     @Autowired
     public JWTUtil(SecurityProperties securityProperties) {

@@ -69,7 +69,7 @@ public class Job extends BaseEntity {
     }
 
     public boolean getEventStatus() {
-        return event != null ? event.isFinished() : false;
+        return event != null && event.isFinished();
     }
 
 

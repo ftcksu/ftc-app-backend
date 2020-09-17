@@ -1,4 +1,4 @@
-package com.ftcksu.app.controller.v2;
+package com.ftcksu.app.controller;
 
 import com.ftcksu.app.model.dto.EventDto;
 import com.ftcksu.app.model.dto.TaskDto;

@@ -20,7 +20,9 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 public class User extends BaseEntity {
     private static final PasswordEncoder encoder = new BCryptPasswordEncoder();
-
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
+    @JsonIgnore
+    List<ProfileImage> imageHistory = new LinkedList<>();
     @Id
     private Integer id;
     private String name;
@@ -37,9 +39,6 @@ public class User extends BaseEntity {
     @JsonIgnore
     @ToString.Exclude
     private List<Event> events = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
-    @JsonIgnore
-    List<ProfileImage> imageHistory = new LinkedList<>();
 
     public User(Integer id) {
         this.id = id;

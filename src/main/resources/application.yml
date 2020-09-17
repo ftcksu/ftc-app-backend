@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${FTC_DATASOURCE_URL:jdbc:mysql://localhost:3306/}${FTC_DATASOURCE_NAME}
+    url: ${FTC_DATASOURCE_URL}
     username: ${FTC_DATASOURCE_USERNAME}
     password: ${FTC_DATASOURCE_PASSWORD}
   servlet:

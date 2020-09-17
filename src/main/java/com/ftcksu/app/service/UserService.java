@@ -98,7 +98,7 @@ public class UserService {
 
         Job selfJob = new Job("رصد أعمالي", savedUser, JobType.SELF);
         Job adminJob = new Job("رصد مباشر", savedUser, JobType.ADMIN);
-        jobRepository.saveAll(Arrays.asList(new Job[]{selfJob, adminJob}));
+        jobRepository.saveAll(Arrays.asList(selfJob, adminJob));
 
         updateRanks();
         return savedUser;

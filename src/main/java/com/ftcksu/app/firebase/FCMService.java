@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class FCMService {
 
-    private Logger logger = LoggerFactory.getLogger(FCMService.class);
+    private final Logger logger = LoggerFactory.getLogger(FCMService.class);
 
     public void sendMessage(Map<String, String> data, PushNotificationRequest request)
             throws InterruptedException, ExecutionException {

@@ -28,7 +28,7 @@ public class JobService {
 
     private final ModelMapper modelMapper;
 
-    private  final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public JobService(JobRepository jobRepository, TaskRepository taskRepository, UserService userService) {
@@ -69,7 +69,7 @@ public class JobService {
 
     @Transactional
     public Job createNewJob(JobDto jobDto) {
-        Job jobToCreate = modelMapper.map(jobDto,Job.class);
+        Job jobToCreate = modelMapper.map(jobDto, Job.class);
         Job savedJob = jobRepository.save(jobToCreate);
 
         if (jobToCreate.getJobType() == JobType.ADMIN && jobToCreate.getTasks().size() > 0) {

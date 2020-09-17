@@ -1,4 +1,4 @@
-package com.ftcksu.app.controller.v2;
+package com.ftcksu.app.controller;
 
 import com.ftcksu.app.model.entity.MOTD;
 import com.ftcksu.app.model.response.ResponseTemplate;

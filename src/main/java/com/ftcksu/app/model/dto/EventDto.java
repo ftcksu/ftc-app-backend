@@ -21,5 +21,4 @@ public class EventDto {
     private Integer maxUsers;
     private String location;
     private boolean finished;
-
 }
