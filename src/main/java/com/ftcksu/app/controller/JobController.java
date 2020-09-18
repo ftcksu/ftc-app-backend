@@ -7,6 +7,8 @@ import com.ftcksu.app.model.response.ResponseTemplate;
 import com.ftcksu.app.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -48,7 +50,10 @@ public class JobController {
     }
 
     @PostMapping("/{id}/tasks")
-    public ResponseEntity<?> addTaskToJob(@PathVariable Integer id, @RequestBody @Valid TaskDto taskDto) {
-        return ResponseEntity.ok(new ResponseTemplate<>("Task saved successfully.", jobService.addTaskToJob(id, taskDto)));
+    public ResponseEntity<?> addTaskToJob(@AuthenticationPrincipal UserDetails principal,
+                                          @PathVariable Integer id,
+                                          @RequestBody @Valid TaskDto taskDto) {
+        return ResponseEntity.ok(new ResponseTemplate<>("Task saved successfully.",
+                jobService.addTaskToJob(id, taskDto, Integer.parseInt(principal.getUsername()))));
     }
 }

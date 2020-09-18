@@ -22,19 +22,16 @@ public class JobService {
     private final JobRepository jobRepository;
     private final TaskRepository taskRepository;
     private final UserService userService;
-    private final SecurityService securityService;
     private final ModelMapper modelMapper;
     private final ObjectMapper objectMapper;
 
     @Autowired
     public JobService(JobRepository jobRepository,
                       TaskRepository taskRepository,
-                      UserService userService,
-                      SecurityService securityService) {
+                      UserService userService) {
         this.jobRepository = jobRepository;
         this.taskRepository = taskRepository;
         this.userService = userService;
-        this.securityService = securityService;
         // TODO: change to global beans;
         this.modelMapper = new ModelMapper();
         this.objectMapper = new ObjectMapper();
@@ -96,7 +93,7 @@ public class JobService {
 
 
     @Transactional
-    public Task addTaskToJob(Integer jobId, TaskDto taskDto) {
+    public Task addTaskToJob(Integer jobId, TaskDto taskDto, Integer userId) {
         // Update "updated_at" column that's in the job table.
         Job jobToUpdate = jobRepository.getOne(jobId);
         jobToUpdate.setUpdatedAt(new Date());
@@ -112,7 +109,7 @@ public class JobService {
                 break;
             case EVENT:
                 Event jobEvent = jobToUpdate.getEvent();
-                if (jobEvent != null && securityService.isEventLeader(jobEvent.getId())) {
+                if (jobEvent != null && userId.equals(jobEvent.getId())) {
                     task.setApprovalStatus(ApprovalStatus.READY);
                 } else {
                     task.setApprovalStatus(ApprovalStatus.WAITING);
