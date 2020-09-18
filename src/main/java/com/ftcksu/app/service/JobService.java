@@ -19,22 +19,23 @@ import java.util.Map;
 
 @Service
 public class JobService {
-
     private final JobRepository jobRepository;
-
     private final TaskRepository taskRepository;
-
     private final UserService userService;
-
+    private final SecurityService securityService;
     private final ModelMapper modelMapper;
-
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public JobService(JobRepository jobRepository, TaskRepository taskRepository, UserService userService) {
+    public JobService(JobRepository jobRepository,
+                      TaskRepository taskRepository,
+                      UserService userService,
+                      SecurityService securityService) {
         this.jobRepository = jobRepository;
         this.taskRepository = taskRepository;
         this.userService = userService;
+        this.securityService = securityService;
+        // TODO: change to global beans;
         this.modelMapper = new ModelMapper();
         this.objectMapper = new ObjectMapper();
     }
@@ -103,13 +104,19 @@ public class JobService {
 
         Task task = modelMapper.map(taskDto, Task.class);
         task.setTaskJob(jobToUpdate);
+        task.setApprovalStatus(ApprovalStatus.READY);
 
         switch (jobToUpdate.getJobType()) {
             case SELF:
                 task.setApprovalStatus(ApprovalStatus.READY);
                 break;
             case EVENT:
-                task.setApprovalStatus(ApprovalStatus.WAITING);
+                Event jobEvent = jobToUpdate.getEvent();
+                if (jobEvent != null && securityService.isEventLeader(jobEvent.getId())) {
+                    task.setApprovalStatus(ApprovalStatus.READY);
+                } else {
+                    task.setApprovalStatus(ApprovalStatus.WAITING);
+                }
                 break;
             case ADMIN:
                 task.setApprovalStatus(ApprovalStatus.APPROVED);
