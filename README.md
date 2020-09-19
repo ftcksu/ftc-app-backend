@@ -29,7 +29,9 @@ You can import the api docs to any rest client such as Postman, or Insomnia from
 
 ## Contributing:
 
-If you plan to contribute new features, utility functions, or extensions to the system, please first fork the project, checkout a new branch to work on, and please follow the [Conventional Commits](https://www.conventionalcommits.org/) specification. After you finish please send a PR and wait for our review.
+If you plan to contribute new features, utility functions, or extensions to the system, please first fork the project, checkout a new branch to work on, and please follow the [Conventional Commits](https://www.conventionalcommits.org/) specification. 
+
+After you finish please send a PR and wait for our review.
 
 ## Authors:
 
