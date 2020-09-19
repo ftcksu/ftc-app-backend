@@ -1,10 +1,7 @@
 package com.ftcksu.app.service;
 
-import com.ftcksu.app.model.request.AuthenticationRequest;
 import com.ftcksu.app.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,7 +14,6 @@ public class SecurityService {
     private final EventService eventService;
     private final JobService jobService;
     private final JWTUtil jwt;
-    private AuthenticationManager authenticationManager;
 
     @Autowired
     public SecurityService(UserDetailsService userDetailsService,
@@ -28,11 +24,6 @@ public class SecurityService {
         this.eventService = eventService;
         this.jobService = jobService;
         this.jwt = jwt;
-    }
-
-    @Autowired
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
     }
 
     public Integer getLoggedUserId() {
@@ -63,21 +54,6 @@ public class SecurityService {
     @Transactional
     public boolean isTaskOwner(Integer taskId) {
         return getLoggedUserId().equals(jobService.getTaskOwner(taskId));
-    }
-
-    @Transactional
-    public String login(AuthenticationRequest request) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails,
-                request.getPassword(), userDetails.getAuthorities());
-
-        authenticationManager.authenticate(authenticationToken);
-
-        if (authenticationToken.isAuthenticated()) {
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        }
-
-        return jwt.generateToken(userDetails);
     }
 }
 
