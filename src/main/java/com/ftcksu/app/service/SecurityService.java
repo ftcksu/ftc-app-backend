@@ -1,29 +1,21 @@
 package com.ftcksu.app.service;
 
-import com.ftcksu.app.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SecurityService {
-    private final UserDetailsService userDetailsService;
     private final EventService eventService;
     private final JobService jobService;
-    private final JWTUtil jwt;
 
     @Autowired
-    public SecurityService(UserDetailsService userDetailsService,
-                           EventService eventService,
-                           JobService jobService,
-                           JWTUtil jwt) {
-        this.userDetailsService = userDetailsService;
+    public SecurityService(EventService eventService,
+                           JobService jobService) {
         this.eventService = eventService;
         this.jobService = jobService;
-        this.jwt = jwt;
     }
 
     public Integer getLoggedUserId() {

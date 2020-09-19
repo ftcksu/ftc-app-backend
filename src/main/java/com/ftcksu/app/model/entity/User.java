@@ -20,9 +20,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 public class User extends BaseEntity {
     private static final PasswordEncoder encoder = new BCryptPasswordEncoder();
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
-    @JsonIgnore
-    List<ProfileImage> imageHistory = new LinkedList<>();
+
     @Id
     private Integer id;
     private String name;
@@ -39,6 +37,10 @@ public class User extends BaseEntity {
     @JsonIgnore
     @ToString.Exclude
     private List<Event> events = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
+    @JsonIgnore
+    @ToString.Exclude
+    private List<ProfileImage> imageHistory = new LinkedList<>();
 
     public User(Integer id) {
         this.id = id;
@@ -47,6 +49,12 @@ public class User extends BaseEntity {
     public User(Integer id, Event event) {
         this.id = id;
         events.add(event);
+    }
+
+    public User(Integer id, String password, String role) {
+        this.id = id;
+        this.password = encoder.encode(password);
+        this.role = role;
     }
 
     public void adjustPoints(int points) {

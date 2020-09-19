@@ -22,7 +22,6 @@ public class UserDto {
     @Size(min = 8, message = "password must be 8 or more characters in length.")
     private String password;
     private String bio;
-    private boolean hidden;
     private String deviceToken;
 
     public void setStudentId(Integer id) {
