@@ -128,7 +128,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 // Job Related Protected Endpoints:
                 .mvcMatchers(HttpMethod.GET, "/jobs/{id}/**")
-                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isJobOwner(#id)")
+                .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isJobOwner(#id) or @securityService.isEventLeaderSeeingTasks(#id)")
                 .mvcMatchers(HttpMethod.POST, "/jobs/{id}/**")
                 .access("hasAnyRole('ADMIN', 'MAINTAIN') or @securityService.isJobOwner(#id)")
 

@@ -44,6 +44,11 @@ public class SecurityService {
     }
 
     @Transactional
+    public boolean isEventLeaderSeeingTasks(Integer jobId) {
+        return getLoggedUserId().equals(jobService.getEventLeaderByJob(jobId));
+    }
+
+    @Transactional
     public boolean isTaskOwner(Integer taskId) {
         return getLoggedUserId().equals(jobService.getTaskOwner(taskId));
     }

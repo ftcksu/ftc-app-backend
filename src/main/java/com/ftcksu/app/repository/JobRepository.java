@@ -23,6 +23,9 @@ public interface JobRepository extends JpaRepository<Job, Integer> {
     @Query("SELECT j.user.id FROM Job j WHERE j.id = :id")
     Integer findJobOwner(Integer id);
 
+    @Query("SELECT j.event.leader.id FROM Job j  WHERE j.id = :id")
+    Integer findEventLeaderByJob(Integer id);
+
     Job findJobByIdEquals(Integer id);
 
     default Job findFirstByUserEqualsAndJobTypeEquals(User user) {

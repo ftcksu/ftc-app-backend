@@ -46,6 +46,10 @@ public class JobService {
         return jobRepository.findJobOwner(id);
     }
 
+    public Integer getEventLeaderByJob(Integer id) {
+        return jobRepository.findEventLeaderByJob(id);
+    }
+
     public Integer getTaskOwner(Integer id) {
         return taskRepository.findTaskOwner(id);
     }
@@ -134,7 +138,6 @@ public class JobService {
     @Transactional
     public Task updateTask(Integer taskId, Map<String, Object> payload) throws InvocationTargetException, IllegalAccessException {
         Task taskToUpdate = taskRepository.getOne(taskId);
-
         Job jobToUpdate = taskToUpdate.getTaskJob();
         jobToUpdate.setUpdatedAt(new Date());
         jobRepository.save(jobToUpdate);
