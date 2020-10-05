@@ -49,7 +49,7 @@ public class UserService {
         this.objectMapper = new ObjectMapper();
     }
 
-    private void surpriseStudent(List<User> users) {
+    private List<User> surpriseStudent(List<User> users) {
         int num = new Random().nextInt((1000));
 
         if (num < 10) {
@@ -57,7 +57,11 @@ public class UserService {
             User secretUser = users.get(randomIndex);
             secretUser.setName("\uD83D\uDC51 " + secretUser.getName());
             secretUser.setPoints(9999);
+            users = calculateRanks(users);
+            Collections.sort(users, Comparator.comparingInt(User::getUserRank));
         }
+
+        return users;
     }
 
     public List<User> getAllUsers(boolean includeHidden) {
@@ -66,10 +70,7 @@ public class UserService {
         }
 
         List<User> users = userRepository.findByHiddenAndRoleNotOrderByUserRankAscNameAsc();
-        surpriseStudent(users);
-
-        calculateRanks(users);
-        Collections.sort(users, Comparator.comparingInt(User::getUserRank));
+        users = surpriseStudent(users);
 
         return users;
     }
