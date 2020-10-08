@@ -25,7 +25,7 @@ Please, make sure that the username is an integer.
 
 ### Using the API:
 
-You can import the api docs to any rest client such as Postman, or Insomnia from `http://localhost:8080/api/v2/api-docs`, or you can use the api directly from `http://localhost:8080/api/swagger-ui/` (Make sure to have a trailing slash after the url or it will lead to a 404 page).
+You can import the api docs to any rest client such as Postman, or Insomnia from `/api/v2/api-docs`, or you can use the api directly from `/api/swagger-ui/` (Make sure to have a trailing slash after the url or it will lead to a 404 page).
 
 ## Contributing:
 
